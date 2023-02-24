@@ -1,5 +1,6 @@
 const { Finding, FindingSeverity, FindingType } = require("forta-agent");
 // update to wash trade
+// add agent.py
 
 const ERC20_TRANSFER_EVENT =
   "event Transfer(address indexed from, address indexed to, uint256 value)";
