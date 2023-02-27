@@ -29,6 +29,7 @@
     "forta-agent": "^0.1.18"
   },
   "devDependencies": {
+    "hardhat": "^2.12.7",
     "jest": "^27.0.6",
     "nodemon": "^2.0.8"
   }
