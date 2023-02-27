@@ -2,15 +2,32 @@ import networkx as nx
 from web3 import Web3
 import matplotlib.pyplot as plt
 import json
+from constants import EXCHANGE_CONTRACT_ADDRESS, EXCHANGE_CONTRACT_ABI
 
+
+def loadConfig():
+    try:
+        with open('./bot-config.json') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        # test environment
+        with open('../bot-config.json') as f:
+            return json.load(f)
+
+
+config = loadConfig()
+
+# load configuration data from agent config file
+nftCollectionAddress = config['nftCollectionAddress']
+nftCollectionName = config['nftCollectionName']
+nftExchangeName = config['nftExchangeName']
 
 # Connect to an Ethereum node
 web3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545/'))
 
 # Define the contract ABI and address
-abi = json.loads('[{"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}], "name": "AlreadyListed", "type": "error"}, {"inputs": [], "name": "NoProceeds", "type": "error"}, {"inputs": [], "name": "NotApprovedForMarketplace", "type": "error"}, {"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}], "name": "NotListed", "type": "error"}, {"inputs": [], "name": "NotOwner", "type": "error"}, {"inputs": [], "name": "PriceMustBeAboveZero", "type": "error"}, {"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}, {"internalType": "uint256", "name": "price", "type": "uint256"}], "name": "PriceNotMet", "type": "error"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "buyer", "type": "address"}, {"indexed": true, "internalType": "address", "name": "seller", "type": "address"}, {"indexed": true, "internalType": "address", "name": "nftAddress", "type": "address"}, {"indexed": false, "internalType": "uint256", "name": "tokenId", "type": "uint256"}, {"indexed": false, "internalType": "uint256", "name": "price", "type": "uint256"}], "name": "ItemBought", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "seller", "type": "address"}, {"indexed": true, "internalType": "address", "name": "nftAddress", "type": "address"}, {"indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256"}], "name": "ItemCanceled", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "seller", "type": "address"}, {"indexed": true, "internalType": "address", "name": "nftAddress", "type": "address"}, {"indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256"}, {"indexed": false, "internalType": "uint256", "name": "price", "type": "uint256"}], "name": "ItemListed", "type": "event"}, {"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}], "name": "buyItem", "outputs": [], "stateMutability": "payable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}], "name": "cancelListing", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}], "name": "getListing", "outputs": [{"components": [{"internalType": "uint256", "name": "price", "type": "uint256"}, {"internalType": "address", "name": "seller", "type": "address"}], "internalType": "struct NftMarketplace.Listing", "name": "", "type": "tuple"}], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "address", "name": "seller", "type": "address"}], "name": "getProceeds", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}, {"internalType": "uint256", "name": "price", "type": "uint256"}], "name": "listItem", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [{"internalType": "address", "name": "nftAddress", "type": "address"}, {"internalType": "uint256", "name": "tokenId", "type": "uint256"}, {"internalType": "uint256", "name": "newPrice", "type": "uint256"}], "name": "updateListing", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [], "name": "withdrawProceeds", "outputs": [], "stateMutability": "nonpayable", "type": "function"}]')
-
-contract_address = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+abi = json.loads(EXCHANGE_CONTRACT_ABI[nftExchangeName])
+contract_address = EXCHANGE_CONTRACT_ADDRESS[nftExchangeName]
 
 # Get a contract instance
 contract = web3.eth.contract(address=contract_address, abi=abi)

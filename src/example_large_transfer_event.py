@@ -1,7 +1,5 @@
-from forta_agent import Finding, FindingType, FindingSeverity
+from forta_agent import Finding, FindingType, FindingSeverity, TransactionEvent
 from .constants import USDT_ADDRESS, USDT_DECIMALS, ERC_20_TRANSFER_EVENT_ABI
-
-AMOUNT_THRESHOLD = 1000000
 
 
 def provide_handle_transaction(amount_threshold):
