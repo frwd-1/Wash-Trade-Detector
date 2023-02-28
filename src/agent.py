@@ -35,7 +35,7 @@ contract = web3.eth.contract(address=contract_address, abi=abi)
 print(contract)
 
 # Define the event
-nft_bought = contract.events.ItemBought()
+Nft_Bought = contract.events.ItemBought()
 
 # Create a new networkx graph
 G = nx.Graph()
@@ -46,35 +46,32 @@ G = nx.Graph()
 def handle_transaction(nft_bought):
     findings = []
 
-    # Listen for events and construct the graph
-    for event in nft_bought:
-        buyer = event['args']['buyer']
-        seller = event['args']['seller']
+    nft_bought = Nft_Bought
 
-        # Query the blockchain for all previous transactions directly between the buyer and seller
-        latest_block = web3.eth.block_number
-        # iterate through blocks within range
-        # set range, may want to abstract out to external variable for adjustment
-        for block_number in range(latest_block - 1, latest_block + 1):
-            block = web3.eth.get_block(block_number)
-            for tx in block.transactions:
-                receipt = web3.eth.get_transaction_receipt(tx)
-                if (receipt['from'] == buyer and receipt['to'] == seller) or (receipt['from'] == seller and receipt['to'] == buyer) and \
-                        (receipt['contractAddress'] is None):
-                    amount = web3.fromWei(receipt['value'], 'ether')
-                    G.add_edge(receipt['from'], receipt['to'], value=amount)
-                    findings.append(Finding({
-                        'name': 'test NFT Wash Trade',
-                        'description': 'test test abc',
-                        'alert_id': 'test test 123',
-                        'type': FindingType.Info,
-                        'severity': FindingSeverity.Info,
-                        'metadata': {
-                            'from': event['args']['from'],
-                            'to': event['args']['to'],
-                            'amount': amount
-                        }
-                    }))
+    # Query the blockchain for all previous transactions directly between the buyer and seller
+    latest_block = web3.eth.block_number
+    # iterate through blocks within range
+    # set range, may want to abstract out to external variable for adjustment
+    for block_number in range(latest_block - 1, latest_block + 1):
+        block = web3.eth.get_block(block_number)
+        for tx in block.transactions:
+            receipt = web3.eth.get_transaction_receipt(tx)
+            if (receipt['from'] == buyer and receipt['to'] == seller) or (receipt['from'] == seller and receipt['to'] == buyer) and \
+                    (receipt['contractAddress'] is None):
+                amount = web3.fromWei(receipt['value'], 'ether')
+                G.add_edge(receipt['from'], receipt['to'], value=amount)
+                findings.append(Finding({
+                    'name': 'test NFT Wash Trade',
+                    'description': 'test test abc',
+                    'alert_id': 'test test 123',
+                    'type': FindingType.Info,
+                    'severity': FindingSeverity.Info,
+                    'metadata': {
+                        'from': buyer,
+                        'to': seller,
+                        'amount': amount
+                    }
+                }))
     return findings
 
 
