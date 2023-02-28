@@ -1,8 +1,9 @@
+from forta_agent import Finding, FindingType, FindingSeverity
+from .constants import EXCHANGE_CONTRACT_ADDRESS, EXCHANGE_CONTRACT_ABI
 import networkx as nx
 from web3 import Web3
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import json
-from constants import EXCHANGE_CONTRACT_ADDRESS, EXCHANGE_CONTRACT_ABI
 
 
 def loadConfig():
@@ -33,41 +34,54 @@ contract_address = EXCHANGE_CONTRACT_ADDRESS[nftExchangeName]
 contract = web3.eth.contract(address=contract_address, abi=abi)
 print(contract)
 
-# Define the event signature and filter options
-event_signature = 'ItemBought(address,address,address,uint256,uint256)'
-event_topic = web3.keccak(text=event_signature).hex()
-filter_options = {'fromBlock': 0,
-                  'address': contract_address, 'topics': [event_topic]}
-
+# Define the event
+nft_bought = contract.events.ItemBought()
 
 # Create a new networkx graph
 G = nx.Graph()
 
-# Listen for events and construct the graph
-for event in contract.events.ItemBought().create_filter(**filter_options).get_all_entries():
-    buyer = event['args']['buyer']
-    seller = event['args']['seller']
-    price = event['args']['price']
-    G.add_edge(buyer, seller, price=price)
-    print(f"Buyer: {buyer}, Seller: {seller}")
-
-# Query the blockchain for all previous transactions directly between the buyer and seller
-transactions = []
-latest_block = web3.eth.block_number
-for block_number in range(latest_block - 1, latest_block + 1):
-    block = web3.eth.get_block(block_number)
-    for tx in block.transactions:
-        receipt = web3.eth.get_transaction_receipt(tx)
-        if (receipt['from'] == buyer and receipt['to'] == seller) or (receipt['from'] == seller and receipt['to'] == buyer) and \
-                (receipt['contractAddress'] is None):
-            value = web3.fromWei(receipt['value'], 'ether')
-            G.add_edge(receipt['from'], receipt['to'], value=value)
+# may need to use nested functions if i want to adjust inputs like the block range
 
 
-if nx.has_path(G, buyer, seller):
-    print('Buyer and seller have sent funds directly to each other previously.')
-else:
-    print('Buyer and seller have not sent funds directly to each other previously.')
+def handle_transaction(nft_bought):
+    findings = []
+
+    # Listen for events and construct the graph
+    for event in nft_bought:
+        buyer = event['args']['buyer']
+        seller = event['args']['seller']
+
+        # Query the blockchain for all previous transactions directly between the buyer and seller
+        latest_block = web3.eth.block_number
+        # iterate through blocks within range
+        # set range, may want to abstract out to external variable for adjustment
+        for block_number in range(latest_block - 1, latest_block + 1):
+            block = web3.eth.get_block(block_number)
+            for tx in block.transactions:
+                receipt = web3.eth.get_transaction_receipt(tx)
+                if (receipt['from'] == buyer and receipt['to'] == seller) or (receipt['from'] == seller and receipt['to'] == buyer) and \
+                        (receipt['contractAddress'] is None):
+                    amount = web3.fromWei(receipt['value'], 'ether')
+                    G.add_edge(receipt['from'], receipt['to'], value=amount)
+                    findings.append(Finding({
+                        'name': 'test NFT Wash Trade',
+                        'description': 'test test abc',
+                        'alert_id': 'test test 123',
+                        'type': FindingType.Info,
+                        'severity': FindingSeverity.Info,
+                        'metadata': {
+                            'from': event['args']['from'],
+                            'to': event['args']['to'],
+                            'amount': amount
+                        }
+                    }))
+    return findings
+
+
+# if nx.has_path(G, buyer, seller):
+#     print('Buyer and seller have sent funds directly to each other previously.')
+# else:
+#     print('Buyer and seller have not sent funds directly to each other previously.')
 
 # Find the shortest path between the buyer and seller
 # try:
