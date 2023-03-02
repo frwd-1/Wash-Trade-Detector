@@ -46,6 +46,8 @@ G = nx.Graph()
 def handle_transaction(transaction_event):
     findings = []
 
+# check
+
     latest_block = web3.eth.block_number
     event_signature = 'ItemBought(address,address,address,uint256,uint256)'
     event_topic = web3.keccak(text=event_signature).hex()
