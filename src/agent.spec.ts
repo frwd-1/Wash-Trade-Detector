@@ -1,5 +1,3 @@
-// test file. test files are usually named with a .spec.ts extension
-
 import { createTransactionEvent } from "forta-agent"
 import agent from "./agent"
 

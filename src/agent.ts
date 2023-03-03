@@ -1,6 +1,5 @@
 import {
-  Finding,
-  LogDescription, 
+  Finding, 
   HandleTransaction, 
   FindingSeverity, 
   FindingType,
@@ -21,7 +20,6 @@ import {
   TRANSFER_EVENT,
   MAX_TOKENS
 } from './constants'
-
 
 
 const provider = new ethers.providers.EtherscanProvider('goerli', process.env.ETHERSCAN_API_KEY);
