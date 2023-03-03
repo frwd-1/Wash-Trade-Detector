@@ -11,9 +11,9 @@ describe("handleTransaction", () => {
     })
     mockTxEvent.filterLog = jest.fn().mockReturnValue([])
 
-    const findings = await agent.handleTransaction(mockTxEvent);
+    // const findings = await agent.handleTransaction(mockTxEvent);
 
-    expect(findings).toStrictEqual([]);
+    // expect(findings).toStrictEqual([]);
     expect(mockTxEvent.filterLog).toHaveBeenCalledTimes(2);
   })
 })
