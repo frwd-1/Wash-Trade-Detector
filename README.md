@@ -1,13 +1,17 @@
-# Sample Hardhat Project
+# NFT Wash Trade Bot Overview
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+The objective of this agent is to return an alert that indicates, with a relatively high degree of confidence, that a wash trade has occurred. According to a recent report by Chainalysis (https://blog.chainalysis.com/reports/2022-crypto-crime-report-preview-nft-wash-trading-money-laundering/), wash trades can often be identified by looking for NFT sales that were "self-financed", meaning the address of the purchaser was initially funded by the address of the seller.
 
-Try running some of the following tasks:
+## Bot Structure
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
+The bot analyzes transactions using 3 core functions:
+
+    1. handleTransaction - maintains a running list of tracked NFTs, if an NFT is being tracked and it is traded, it calls the checkRelationship function passing the "buyer" and "seller" as arguments
+
+    2. checkRelationship - calls the findFirstSender function that returns a "sender" and compares that sender to see if it is the same address as the seller of the NFT. If the sender is the seller, it returns a finding
+
+    3. findFirstSender - checks the transaction history of the "buyer" of the NFT and returns the address that first funded the buyer's wallet
+
+### Testing
+
+Testing can be completed using test contracts BasicNft and NftMarketPlace as well as test scripts in the scripts folder. Unit tests for Bot functionality are in the tests folder.

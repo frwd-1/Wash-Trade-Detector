@@ -41,14 +41,13 @@ const { nftCollectionAddress, nftCollectionName, nftExchangeName } = config;
 const tradeEvent: string = EXCHANGE_TRADE_EVENTS[nftExchangeName];
 const nftExchangeAddress: string = EXCHANGE_CONTRACT_ADDRESSES[nftExchangeName];
 
+// returns the wallet address that funded the buyer wallet (ie, the first non-contract transaction to the buyer wallet)
 export async function findFirstSender(
   buyerAddress: string
 ): Promise<string | undefined> {
-  // Get the transaction history for the wallet A
-  // use this for Goerli (alchemy node):: const txs = await provider.getHistory(walletAAddress);
   const txs = await provider.getHistory(buyerAddress);
 
-  // Sort the transactions by block number, ascending order
+  // Sorts the buyer transaction history by block number, ascending order
   txs.sort((a, b) => {
     if (a.blockNumber === undefined || b.blockNumber === undefined) {
       return 0;
@@ -56,15 +55,15 @@ export async function findFirstSender(
     return a.blockNumber - b.blockNumber;
   });
 
-  // Find the first transaction that transferred Ether to wallet A
+  // Find the first transaction that transferred funds to the buyer wallet
   const fundedBy = txs.find((tx) => tx.to === buyerAddress && tx.value.gt(0));
 
   if (!fundedBy) {
-    // If no transaction transferred Ether to wallet A, return undefined
+    // If no transaction transferred funds to the buyer, return undefined
     return undefined;
   }
 
-  // Get the sender address
+  // Get the sender's address
   const sender = fundedBy.from;
 
   return sender;
@@ -81,11 +80,11 @@ export async function checkRelationship(
   const sender = await findFirstSender(buyer);
   console.log("Sender address:", sender);
 
+  // checks to see if the first sender to the buyer wallet is the seller of the NFT
   if (sender && sender === seller) {
     const finding = Finding.fromObject({
       name: "NFT Wash Trade",
-      // description: `${nftCollectionName} Wash Trade on ${nftExchangeName}`,
-      description: `Wash Trade on`,
+      description: `${nftCollectionName} Wash Trade on ${nftExchangeName}`,
       alertId: "NFT-WASH-TRADE",
       severity: FindingSeverity.Medium,
       type: FindingType.Suspicious,
@@ -93,10 +92,10 @@ export async function checkRelationship(
         buyer: buyer,
         seller: seller,
         tokenId: "test",
-        // collectionContract: nftCollectionAddress,
-        // collectionName: nftCollectionName,
-        // exchangeContract: nftExchangeAddress,
-        // exchangeName: nftExchangeName,
+        collectionContract: nftCollectionAddress,
+        collectionName: nftCollectionName,
+        exchangeContract: nftExchangeAddress,
+        exchangeName: nftExchangeName,
         salesCountSoFar: "test",
         firstSaleTimestampTracked: "test",
         salesHistory: "test",
