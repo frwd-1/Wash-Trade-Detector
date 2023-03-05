@@ -1,10 +1,10 @@
 import {
-  Finding, 
-  HandleTransaction, 
-  FindingSeverity, 
+  Finding,
+  HandleTransaction,
+  FindingSeverity,
   FindingType,
-  ethers
-} from 'forta-agent'
+  ethers,
+} from "forta-agent";
 import {
   isTracked,
   trackNft,
@@ -12,40 +12,38 @@ import {
   getSeller,
   nftList,
   getNftWithOldestSale,
-  deleteNft
-} from './utils'
+  deleteNft,
+} from "./utils";
 import {
   EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
   TRANSFER_EVENT,
-  MAX_TOKENS
-} from './constants'
+  MAX_TOKENS,
+} from "./constants";
 
+const provider = new ethers.providers.EtherscanProvider(
+  "goerli",
+  process.env.ETHERSCAN_API_KEY
+);
 
-const provider = new ethers.providers.EtherscanProvider('goerli', process.env.ETHERSCAN_API_KEY);
-
- const loadConfig = () => {
+const loadConfig = () => {
   try {
-    return require('./bot-config.json');
+    return require("./bot-config.json");
   } catch (e) {
-    return require('../bot-config.json');
+    return require("../bot-config.json");
   }
 };
 
 const config = loadConfig();
 
-const {
-  nftCollectionAddress,
-  nftCollectionName,
-  nftExchangeName
-} = config;
+const { nftCollectionAddress, nftCollectionName, nftExchangeName } = config;
 
-const tradeEvent: string = EXCHANGE_TRADE_EVENTS[nftExchangeName] 
-const nftExchangeAddress: string = EXCHANGE_CONTRACT_ADDRESSES[nftExchangeName] 
+const tradeEvent: string = EXCHANGE_TRADE_EVENTS[nftExchangeName];
+const nftExchangeAddress: string = EXCHANGE_CONTRACT_ADDRESSES[nftExchangeName];
 
-
-
-export async function findFirstSender(buyerAddress: string): Promise<string | undefined> {
+export async function findFirstSender(
+  buyerAddress: string
+): Promise<string | undefined> {
   // Get the transaction history for the wallet A
   // use this for Goerli (alchemy node):: const txs = await provider.getHistory(walletAAddress);
   const txs = await provider.getHistory(buyerAddress);
@@ -53,39 +51,32 @@ export async function findFirstSender(buyerAddress: string): Promise<string | un
   // Sort the transactions by block number, ascending order
   txs.sort((a, b) => {
     if (a.blockNumber === undefined || b.blockNumber === undefined) {
-      return 0; 
+      return 0;
     }
     return a.blockNumber - b.blockNumber;
   });
 
   // Find the first transaction that transferred Ether to wallet A
-  const fundedBy = txs.find(
-  (tx) =>
-    tx.to === buyerAddress &&
-    tx.value.gt(0)
-  );
+  const fundedBy = txs.find((tx) => tx.to === buyerAddress && tx.value.gt(0));
 
   if (!fundedBy) {
     // If no transaction transferred Ether to wallet A, return undefined
     return undefined;
   }
 
+  // Get the sender address
   const sender = fundedBy.from;
-  // Get the sender address from the input data of the transaction
-  // const txData = await provider.getTransaction(txWithEtherIn.hash);
-  // const inputData = txData.data ?? '0x';
-  // const iface = new ethers.utils.Interface(['function transfer(address to, uint256 value)']);
-  // const parsedInput = iface.parseTransaction({ data: inputData });
-  // const sender = parsedInput.args[0];
 
   return sender;
 }
 
+export async function checkRelationship(
+  buyer: string,
+  seller: string
+): Promise<Finding[]> {
+  const results: Finding[] = [];
 
-export async function checkRelationship(buyer: string, seller: string): Promise<Finding[]> { 
-  const results: Finding[] = [] 
-  
-  console.log(`the seller is ${seller}`)
+  console.log(`the seller is ${seller}`);
 
   const sender = await findFirstSender(buyer);
   console.log("Sender address:", sender);
@@ -108,45 +99,54 @@ export async function checkRelationship(buyer: string, seller: string): Promise<
         // exchangeName: nftExchangeName,
         salesCountSoFar: "test",
         firstSaleTimestampTracked: "test",
-        salesHistory: "test"
+        salesHistory: "test",
       },
-    })
-    results.push(finding)
-    console.log(`The buyer wallet ${buyer} was funded by the seller wallet ${seller}`)
+    });
+    results.push(finding);
+    console.log(
+      `The buyer wallet ${buyer} was funded by the seller wallet ${seller}`
+    );
   } else {
-    console.log(`No prior relationship between buyer ${buyer} and seller ${seller}`);
+    console.log(
+      `No prior relationship between buyer ${buyer} and seller ${seller}`
+    );
   }
   return results;
 }
 
-// const handleTransaction: HandleTransaction = async (txEvent) => {
-//   const findings: Finding[] = []
+const handleTransaction: HandleTransaction = async (txEvent) => {
+  const findings: Finding[] = [];
 
-//   const tradeEvents = txEvent.filterLog(tradeEvent, nftExchangeAddress) 
-//   const transferEvents = txEvent.filterLog(TRANSFER_EVENT, nftCollectionAddress) 
-   
-//   if (tradeEvents.length == transferEvents.length) { 
-//     transferEvents.forEach((transfer) => { 
-//       const saleTimestamp = txEvent.timestamp 
-//       const buyer = getBuyer(transfer)
-//       const seller = getSeller(transfer)
-//       if (isTracked(transfer)) { 
-//         findings.push(...checkRelationship(buyer, seller)) 
-//       } else { 
-//         trackNft(transfer, saleTimestamp)
-//         if (nftList.length > MAX_TOKENS) {
-//           const tokenId = getNftWithOldestSale()
-//           deleteNft(tokenId)
-//         }
-//       }
-//     })
-//   }
+  const tradeEvents = txEvent.filterLog(tradeEvent, nftExchangeAddress);
+  const transferEvents = txEvent.filterLog(
+    TRANSFER_EVENT,
+    nftCollectionAddress
+  );
 
-//   return findings
-// }
+  if (tradeEvents.length == transferEvents.length) {
+    for (let i = 0; i < transferEvents.length; i++) {
+      const transfer = transferEvents[i];
+      const saleTimestamp = txEvent.timestamp;
+      const buyer = getBuyer(transfer);
+      const seller = getSeller(transfer);
+      if (isTracked(transfer)) {
+        const transferFindings = await checkRelationship(buyer, seller);
+        findings.push(...transferFindings);
+      } else {
+        trackNft(transfer, saleTimestamp);
+        if (nftList.length > MAX_TOKENS) {
+          const tokenId = getNftWithOldestSale();
+          deleteNft(tokenId);
+        }
+      }
+    }
+  }
+
+  return findings;
+};
 
 export default {
-  // handleTransaction,
+  handleTransaction,
   findFirstSender,
-  checkRelationship
-}
+  checkRelationship,
+};

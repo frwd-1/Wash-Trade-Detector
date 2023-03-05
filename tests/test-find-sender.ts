@@ -1,9 +1,9 @@
-import findFirstSender from "../src/agent"
+import agent from "../src/agent"
 
 async function main() {
     // const provider = new ethers.providers.JsonRpcProvider();
     const buyerAddress = "0xd1f322CD8e0F2af195ace36644056e20aa628b06"; // replace with the actual buyer's address
-    const sender = await findFirstSender.findFirstSender(buyerAddress);
+    const sender = await agent.findFirstSender(buyerAddress);
     console.log(sender);
   }
 
