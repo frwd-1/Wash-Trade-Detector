@@ -91,7 +91,7 @@ export async function checkRelationship(
       metadata: {
         buyer: buyer,
         seller: seller,
-        tokenId: "test",
+        tokenId: tokenId,
         collectionContract: nftCollectionAddress,
         collectionName: nftCollectionName,
         exchangeContract: nftExchangeAddress,
