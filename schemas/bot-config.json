@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://github.com/forta-network/forta-bot-templates/nft-wash-trade/schemas/bot-config.json",
+    "$id": "https://github.com/Epikt1tus/wash-trade-detection-bot/blob/main/schemas/bot-config.json",
     "type": "object",
     "title": "Nft Wash Trade Bot Config",
     "description": "Bot configuration file to monitor wash trades of a specific NFT collection on specified exchange.",
@@ -23,7 +23,8 @@
             "description": "NFT Exchange to monitor trades",
             "enum": [
                 "LooksRare",
-                "OpenSea"
+                "OpenSea",
+                "NftMarketplace"
             ]
         }
     },
