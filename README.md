@@ -16,4 +16,4 @@ The bot analyzes transactions using 3 core functions:
 
 ### Testing
 
-Testing can be completed using test contracts BasicNft and NftMarketPlace as well as test scripts in the scripts folder. Unit tests for Bot functionality are in the tests folder.
+Unit tests for Bot functionality are in the tests folder.

@@ -4,13 +4,17 @@ import {
   FindingSeverity,
   FindingType,
   ethers,
+  LogDescription,
 } from "forta-agent";
 import {
   isTracked,
   trackNft,
+  nftMap,
   getBuyer,
   getSeller,
+  getNftId,
   nftList,
+  getDateTime,
   getNftWithOldestSale,
   deleteNft,
 } from "./utils";
@@ -70,45 +74,53 @@ export async function findFirstSender(
 }
 
 export async function checkRelationship(
-  buyer: string,
-  seller: string
+  transfer: LogDescription
 ): Promise<Finding[]> {
   const results: Finding[] = [];
 
+  const buyer = getBuyer(transfer);
+  const seller = getSeller(transfer);
   console.log(`the seller is ${seller}`);
 
+  const tokenId = getNftId(transfer);
+  const nftReport = nftMap.get(tokenId)!;
   const sender = await findFirstSender(buyer);
   console.log("Sender address:", sender);
 
   // checks to see if the first sender to the buyer wallet is the seller of the NFT
-  if (sender && sender === seller) {
-    const finding = Finding.fromObject({
-      name: "NFT Wash Trade",
-      description: `${nftCollectionName} Wash Trade on ${nftExchangeName}`,
-      alertId: "NFT-WASH-TRADE",
-      severity: FindingSeverity.Medium,
-      type: FindingType.Suspicious,
-      metadata: {
-        buyer: buyer,
-        seller: seller,
-        tokenId: tokenId,
-        collectionContract: nftCollectionAddress,
-        collectionName: nftCollectionName,
-        exchangeContract: nftExchangeAddress,
-        exchangeName: nftExchangeName,
-        salesCountSoFar: "test",
-        firstSaleTimestampTracked: "test",
-        salesHistory: "test",
-      },
-    });
-    results.push(finding);
-    console.log(
-      `The buyer wallet ${buyer} was funded by the seller wallet ${seller}`
-    );
-  } else {
-    console.log(
-      `No prior relationship between buyer ${buyer} and seller ${seller}`
-    );
+  for (const address in nftReport.salesMetadata) {
+    const { count, firstSaleAt } = nftReport.salesMetadata[address];
+    if (sender && sender === seller) {
+      const finding = Finding.fromObject({
+        name: "NFT Wash Trade",
+        description: `${nftCollectionName} Wash Trade on ${nftExchangeName}`,
+        alertId: "NFT-WASH-TRADE",
+        severity: FindingSeverity.Medium,
+        type: FindingType.Suspicious,
+        metadata: {
+          buyer: buyer,
+          seller: seller,
+          tokenId: tokenId,
+          collectionContract: nftCollectionAddress,
+          collectionName: nftCollectionName,
+          exchangeContract: nftExchangeAddress,
+          exchangeName: nftExchangeName,
+          salesCountSoFar: `${count}`,
+          firstSaleTimestampTracked: getDateTime(firstSaleAt),
+          salesHistory: `${nftReport.salesHistory
+            .map((s) => `buyer ${s.buyer} at ${getDateTime(s.saleAt)}`)
+            .join(" -> ")}`,
+        },
+      });
+      results.push(finding);
+      console.log(
+        `The buyer wallet ${buyer} was funded by the seller wallet ${seller}`
+      );
+    } else {
+      console.log(
+        `No prior relationship between buyer ${buyer} and seller ${seller}`
+      );
+    }
   }
   return results;
 }
@@ -126,10 +138,9 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
     for (let i = 0; i < transferEvents.length; i++) {
       const transfer = transferEvents[i];
       const saleTimestamp = txEvent.timestamp;
-      const buyer = getBuyer(transfer);
-      const seller = getSeller(transfer);
+
       if (isTracked(transfer)) {
-        const transferFindings = await checkRelationship(buyer, seller);
+        const transferFindings = await checkRelationship(transfer);
         findings.push(...transferFindings);
       } else {
         trackNft(transfer, saleTimestamp);
