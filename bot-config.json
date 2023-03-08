@@ -1,5 +1,5 @@
 {
-    "nftCollectionName": "BasicNft",
-    "nftCollectionAddress": "0xa0AA720a441e62B0bEedA2db452cb728E9AEA6B1",
-    "nftExchangeName": "NftMarketplace"
-  }
+  "nftCollectionName": "Meebits",
+  "nftCollectionAddress": "0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7",
+  "nftExchangeName": "LooksRare"
+}

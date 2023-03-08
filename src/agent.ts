@@ -10,7 +10,7 @@ import { getBuyer, getSeller, getNftId } from "./utils";
 import { EXCHANGE_CONTRACT_ADDRESSES, TRANSFER_EVENT } from "./constants";
 
 const provider = new ethers.providers.EtherscanProvider(
-  "goerli",
+  "mainnet",
   process.env.ETHERSCAN_API_KEY
 );
 
@@ -66,6 +66,8 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
 
   const buyer = getBuyer(transfer);
   const seller = getSeller(transfer);
+  console.log(`buyer is ${buyer}`);
+  console.log(`seller is ${seller}`);
 
   const tokenId = getNftId(transfer);
   const sender = await findFirstSender(buyer);

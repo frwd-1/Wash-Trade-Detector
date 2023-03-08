@@ -15,7 +15,13 @@ This bot returns an alert that indicates, with a relatively high degree of confi
 
 ## Test Data
 
-The bot behavior can be verified with the following transaction:
+The bot behavior can be verified on Goerli testnet with the following transaction and bot-config:
+
+{
+"nftCollectionName": "BasicNft",
+"nftCollectionAddress": "0xa0AA720a441e62B0bEedA2db452cb728E9AEA6B1",
+"nftExchangeName": "NftMarketplace"
+}
 
 ```bash
 $ npm run tx 0x172c781eeabf4b2529384b867c0de76a6f415a690ec79e930eb79899dc51db27
