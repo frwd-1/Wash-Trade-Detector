@@ -57,6 +57,7 @@ async function findFirstSender(
 
   // Get the sender's address
   const sender = fundedBy.from;
+  console.log(`funder is ${sender}`);
 
   return sender;
 }
