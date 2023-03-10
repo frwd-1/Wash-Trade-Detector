@@ -5,5 +5,6 @@ LABEL "network.forta.settings.agent-logs.enable"="true"
 WORKDIR /app
 COPY ./src ./src
 COPY package*.json ./
+COPY tsconfig.json ./
 RUN npm ci --production
 CMD [ "npm", "run", "start:prod" ]
