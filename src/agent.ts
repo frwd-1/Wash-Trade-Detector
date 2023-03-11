@@ -7,7 +7,11 @@ import {
   LogDescription,
 } from "forta-agent";
 import { getBuyer, getSeller, getNftId } from "./utils";
-import { EXCHANGE_CONTRACT_ADDRESSES, TRANSFER_EVENT } from "./constants";
+import {
+  EXCHANGE_CONTRACT_ADDRESSES,
+  EXCHANGE_TRADE_EVENTS,
+  TRANSFER_EVENT,
+} from "./constants";
 
 const provider = new ethers.providers.EtherscanProvider(
   "mainnet",
@@ -26,6 +30,7 @@ const config = loadConfig();
 
 const { nftCollectionAddress, nftCollectionName, nftExchangeName } = config;
 
+const tradeEvent: string = EXCHANGE_TRADE_EVENTS[nftExchangeName];
 const nftExchangeAddress: string = EXCHANGE_CONTRACT_ADDRESSES[nftExchangeName];
 
 // returns the wallet address that funded the buyer wallet (ie, the first non-contract transaction to the buyer wallet)
@@ -57,7 +62,6 @@ async function findFirstSender(
 
   // Get the sender's address
   const sender = fundedBy.from;
-  console.log(`funder is ${sender}`);
 
   return sender;
 }
@@ -102,16 +106,20 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
 const handleTransaction: HandleTransaction = async (txEvent) => {
   const findings: Finding[] = [];
 
+  const tradeEvents = txEvent.filterLog(tradeEvent, nftExchangeAddress);
   const transferEvents = txEvent.filterLog(
     TRANSFER_EVENT,
     nftCollectionAddress
   );
 
-  for (let i = 0; i < transferEvents.length; i++) {
-    const transfer = transferEvents[i];
+  // check that the transfers are for the trades
+  if (tradeEvents.length == transferEvents.length) {
+    for (let i = 0; i < transferEvents.length; i++) {
+      const transfer = transferEvents[i];
 
-    const transferFindings = await checkRelationship(transfer);
-    findings.push(...transferFindings);
+      const transferFindings = await checkRelationship(transfer);
+      findings.push(...transferFindings);
+    }
   }
 
   return findings;

@@ -7,5 +7,7 @@ COPY ./src ./src
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY ./dist ./dist
+COPY bot-config.json ./
+COPY ./schemas ./schemas
 RUN npm ci --production
 CMD [ "npm", "run", "start:prod" ]
