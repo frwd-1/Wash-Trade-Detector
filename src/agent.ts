@@ -92,6 +92,8 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
         collectionName: nftCollectionName,
         exchangeContract: nftExchangeAddress,
         exchangeName: nftExchangeName,
+        // anomalyScore:
+        //   "x% of trading volume for NFT(tokenId) has alerted for possible wash trading in the past 30 days",
       },
     });
     console.log(
