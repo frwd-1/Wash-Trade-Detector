@@ -69,6 +69,14 @@ async function findFirstSender(
 async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
   const results: Finding[] = [];
 
+  // const NFT number of trades = 0 (initialize to zero)
+  const numberOfTrades = 0;
+  async function countTrades() {
+    numberOfTrades + 1;
+  }
+  // const NFT number of wash trades = 0 (initialize to zero)
+
+  // function increment the number of trades by 1
   const buyer = getBuyer(transfer);
   const seller = getSeller(transfer);
   console.log(`buyer is ${buyer}`);
@@ -78,6 +86,7 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
   const sender = await findFirstSender(buyer);
 
   if (sender && sender === seller) {
+    // function increment the number of wash trades by 1
     const finding = Finding.fromObject({
       name: "NFT Wash Trade",
       description: `${nftCollectionName} Wash Trade on ${nftExchangeName}`,
@@ -94,6 +103,7 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
         exchangeName: nftExchangeName,
         // anomalyScore:
         //   "x% of trading volume for NFT(tokenId) has alerted for possible wash trading in the past 30 days",
+        // anomalyScore = number of wash trades / number of trades
       },
     });
     console.log(
@@ -116,6 +126,7 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
 
   // check that the transfers are for the trades
   if (tradeEvents.length == transferEvents.length) {
+    // increment the NFT trade number ++
     for (let i = 0; i < transferEvents.length; i++) {
       const transfer = transferEvents[i];
 
