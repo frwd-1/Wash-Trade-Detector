@@ -32,6 +32,8 @@ const { nftCollectionAddress, nftCollectionName, nftExchangeName } = config;
 
 const tradeEvent: string = EXCHANGE_TRADE_EVENTS[nftExchangeName];
 const nftExchangeAddress: string = EXCHANGE_CONTRACT_ADDRESSES[nftExchangeName];
+let numberOfTrades: number = 0;
+let numberOfWashTrades: number = 0;
 
 // returns the wallet address that funded the buyer wallet (ie, the first non-contract transaction to the buyer wallet)
 async function findFirstSender(
@@ -69,13 +71,17 @@ async function findFirstSender(
 async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
   const results: Finding[] = [];
 
-  // const NFT number of trades = 0 (initialize to zero)
-  const numberOfTrades = 0;
-  async function countTrades() {
-    numberOfTrades + 1;
-  }
   // const NFT number of wash trades = 0 (initialize to zero)
+  async function countTrades(): Promise<void> {
+    numberOfTrades++;
+  }
 
+  async function countWashTrades(): Promise<void> {
+    numberOfWashTrades++;
+  }
+
+  countTrades();
+  console.log(numberOfTrades);
   // function increment the number of trades by 1
   const buyer = getBuyer(transfer);
   const seller = getSeller(transfer);
@@ -86,7 +92,7 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
   const sender = await findFirstSender(buyer);
 
   if (sender && sender === seller) {
-    // function increment the number of wash trades by 1
+    countWashTrades();
     const finding = Finding.fromObject({
       name: "NFT Wash Trade",
       description: `${nftCollectionName} Wash Trade on ${nftExchangeName}`,
@@ -94,16 +100,14 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
       severity: FindingSeverity.Medium,
       type: FindingType.Suspicious,
       metadata: {
-        attackerBuyerWallet: buyer,
-        attackerSellerWallet: seller,
+        BuyerWallet: buyer,
+        SellerWallet: seller,
         token: `Wash Traded NFT Token ID: ${tokenId}`,
         collectionContract: nftCollectionAddress,
         collectionName: nftCollectionName,
         exchangeContract: nftExchangeAddress,
         exchangeName: nftExchangeName,
-        // anomalyScore:
-        //   "x% of trading volume for NFT(tokenId) has alerted for possible wash trading in the past 30 days",
-        // anomalyScore = number of wash trades / number of trades
+        anomalyScore: `${numberOfWashTrades / numberOfTrades}%`,
       },
     });
     console.log(
