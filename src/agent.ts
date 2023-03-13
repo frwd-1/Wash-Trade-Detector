@@ -72,7 +72,6 @@ async function findFirstSender(
 async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
   const results: Finding[] = [];
 
-  // const NFT number of wash trades = 0 (initialize to zero)
   async function countTrades(): Promise<void> {
     numberOfTrades++;
   }
@@ -83,7 +82,7 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
 
   countTrades();
   console.log(numberOfTrades);
-  // function increment the number of trades by 1
+
   const buyer = getBuyer(transfer);
   const seller = getSeller(transfer);
   console.log(`buyer is ${buyer}`);
@@ -154,9 +153,8 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
     nftCollectionAddress
   );
 
-  // check that the transfers are for the trades
+  // checks that the transfers are for the trades
   if (tradeEvents.length == transferEvents.length) {
-    // increment the NFT trade number ++
     for (let i = 0; i < transferEvents.length; i++) {
       const transfer = transferEvents[i];
 
