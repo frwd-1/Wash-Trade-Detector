@@ -5,6 +5,7 @@ import {
   FindingType,
   ethers,
   LogDescription,
+  EntityType,
 } from "forta-agent";
 import { getBuyer, getSeller, getNftId } from "./utils";
 import {
@@ -99,6 +100,29 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
       alertId: "NFT-WASH-TRADE",
       severity: FindingSeverity.Medium,
       type: FindingType.Suspicious,
+      labels: [
+        {
+          entityType: EntityType.Address,
+          entity: seller,
+          label: "attacker",
+          confidence: 0.9,
+          remove: false,
+        },
+        {
+          entityType: EntityType.Address,
+          entity: buyer,
+          label: "attacker",
+          confidence: 0.9,
+          remove: false,
+        },
+        {
+          entityType: EntityType.Address,
+          entity: nftCollectionAddress,
+          label: `Wash traded NFT at address ${nftCollectionAddress} with Token ID ${tokenId}`,
+          confidence: 0.9,
+          remove: false,
+        },
+      ],
       metadata: {
         BuyerWallet: buyer,
         SellerWallet: seller,
@@ -107,7 +131,9 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
         collectionName: nftCollectionName,
         exchangeContract: nftExchangeAddress,
         exchangeName: nftExchangeName,
-        anomalyScore: `${numberOfWashTrades / numberOfTrades}%`,
+        anomalyScore: `${
+          numberOfWashTrades / numberOfTrades
+        }% of total trades observed for ${nftCollectionName}are possible wash trades`,
       },
     });
     console.log(
