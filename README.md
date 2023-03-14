@@ -28,7 +28,8 @@ The bot behavior can also be verified on Goerli testnet with the following steps
 
 2. set the etherscan provider on ln18 in agent.ts to "goerli"
 3. set chain ID in ln5 of package.json to 5
-4. run the following:
+4. update forta.config.json ln2 to goerli jsonRpcUrl
+5. run the following:
 
 ```bash
 $ npm run validate-config
