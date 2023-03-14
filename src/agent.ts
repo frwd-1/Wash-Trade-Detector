@@ -131,12 +131,12 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
         exchangeContract: nftExchangeAddress,
         exchangeName: nftExchangeName,
         anomalyScore: `${
-          numberOfWashTrades / numberOfTrades
-        }% of total trades observed for ${nftCollectionName}are possible wash trades`,
+          (numberOfWashTrades / numberOfTrades) * 100
+        }% of total trades observed for ${nftCollectionName} are possible wash trades`,
       },
     });
     console.log(
-      `attacker used the seller wallet ${seller} to fund the buyer wallet ${buyer}`
+      `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`
     );
     results.push(finding);
   }
@@ -148,6 +148,7 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
   const findings: Finding[] = [];
 
   const tradeEvents = txEvent.filterLog(tradeEvent, nftExchangeAddress);
+
   const transferEvents = txEvent.filterLog(
     TRANSFER_EVENT,
     nftCollectionAddress

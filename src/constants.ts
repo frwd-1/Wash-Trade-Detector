@@ -1,7 +1,7 @@
 export const EXCHANGE_CONTRACT_ADDRESSES: Record<string, string> = {
   LooksRare: "0x59728544B08AB483533076417FbBB2fD0B17CE3a", // LooksRare: Exchange
   OpenSea: "0x7f268357A8c2552623316e2562D90e642bB538E5", // OpenSea: Wyvern Exchange v2
-  NftMarketplace: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  NftMarketplace: "0x3819579b236e5Ab5C695DD4762c2B18bB0Aee1c8",
 };
 export const EXCHANGE_TRADE_EVENTS: Record<string, string> = {
   LooksRare:

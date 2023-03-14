@@ -23,7 +23,8 @@
             "description": "NFT Exchange to monitor trades",
             "enum": [
                 "LooksRare",
-                "OpenSea"
+                "OpenSea",
+                "NftMarketplace"
             ]
         }
     },
