@@ -28,10 +28,10 @@ The bot behavior can also be verified on Goerli testnet with the following steps
 
 2. set the etherscan provider on ln18 in agent.ts to "goerli"
 3. set chain ID in ln5 of package.json to 5
-4. npm run validate-config
-5. run the below tx:
+4. run the following:
 
 ```bash
+$ npm run validate-config
 $ npm run tx 0x6187fe36ae6f499de089a100cbfa27173e63bd2f07f362ecbb76569c0e99e620
 
 ...
