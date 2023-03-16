@@ -10,7 +10,6 @@ import {
 import { getBuyer, getSeller, getNftId } from "./utils";
 import {
   EXCHANGE_CONTRACT_ADDRESSES,
-  // EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
   TRANSFER_EVENT,
 } from "./constants";
@@ -20,29 +19,8 @@ const provider = new ethers.providers.EtherscanProvider(
   process.env.ETHERSCAN_API_KEY
 );
 
-// const loadConfig = () => {
-//   try {
-//     return require("./bot-config.json");
-//   } catch (e) {
-//     return require("../bot-config.json");
-//   }
-// };
-
-// const config = loadConfig();
-
-// const { nftCollectionAddress, nftCollectionName, nftExchangeName } = config;
-const nftCollectionAddress = "test";
-const nftCollectionName = "test";
-const nftExchangeName = "test";
-
 // const exchangeAddresses = Object.values(EXCHANGE_CONTRACT_ADDRESSES);
 const exchangeTrades = Object.values(EXCHANGE_TRADE_EVENTS);
-// const exchangeAddresses = Object.values(EXCHANGE_CONTRACT_ADDRESSES);
-// const exchangeAddressFilters = Object.values(EXCHANGE_CONTRACT_ADDRESSES).map(
-//   (address) => ({
-//     address: address.toLowerCase(),
-//   })
-// );
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
@@ -101,12 +79,13 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
 
   const tokenId = getNftId(transfer);
   const sender = await findFirstSender(buyer);
+  console.log(`sender is ${sender}`);
 
   if (sender && sender === seller) {
     countWashTrades();
     const finding = Finding.fromObject({
       name: "NFT Wash Trade",
-      description: `${nftCollectionName} Wash Trade on ${nftExchangeName}`,
+      description: `NFT Wash Trade - seller funded buyer's wallet`,
       alertId: "NFT-WASH-TRADE",
       severity: FindingSeverity.Medium,
       type: FindingType.Suspicious,
@@ -125,25 +104,12 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
           confidence: 0.9,
           remove: false,
         },
-        {
-          entityType: EntityType.Address,
-          entity: nftCollectionAddress,
-          label: `Wash traded NFT at address ${nftCollectionAddress} with Token ID ${tokenId}`,
-          confidence: 0.9,
-          remove: false,
-        },
       ],
       metadata: {
         BuyerWallet: buyer,
         SellerWallet: seller,
         token: `Wash Traded NFT Token ID: ${tokenId}`,
-        collectionContract: nftCollectionAddress,
-        collectionName: nftCollectionName,
-        // exchangeContract: exchangeAddresses,
-        exchangeName: nftExchangeName,
-        anomalyScore: `${
-          (numberOfWashTrades / numberOfTrades) * 100
-        }% of total trades observed for ${nftCollectionName} are possible wash trades`,
+        anomalyScore: `${numberOfWashTrades / numberOfTrades}`,
       },
     });
     console.log(
