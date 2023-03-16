@@ -139,7 +139,7 @@ async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
         token: `Wash Traded NFT Token ID: ${tokenId}`,
         collectionContract: nftCollectionAddress,
         collectionName: nftCollectionName,
-        // exchangeContract: "test", //exchangeAddresses,
+        // exchangeContract: exchangeAddresses,
         exchangeName: nftExchangeName,
         anomalyScore: `${
           (numberOfWashTrades / numberOfTrades) * 100
