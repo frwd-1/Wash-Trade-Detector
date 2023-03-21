@@ -1,128 +1,17 @@
-import {
-  Finding,
-  HandleTransaction,
-  FindingSeverity,
-  FindingType,
-  ethers,
-  LogDescription,
-  EntityType,
-} from "forta-agent";
-import { getBuyer, getSeller, getNftId } from "./utils";
+import { Finding, HandleTransaction, LogDescription } from "forta-agent";
+import { checkRelationship } from "./check-relationship";
 import {
   EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
   TRANSFER_EVENT,
 } from "./constants";
 
-const provider = new ethers.providers.EtherscanProvider(
-  "mainnet",
-  process.env.ETHERSCAN_API_KEY
-);
-
-// const exchangeAddresses = Object.values(EXCHANGE_CONTRACT_ADDRESSES);
 const exchangeTrades = Object.values(EXCHANGE_TRADE_EVENTS);
-
-let numberOfTrades: number = 0;
-let numberOfWashTrades: number = 0;
-
-// returns the wallet address that funded the buyer wallet (ie, the first non-contract transaction to the buyer wallet)
-async function findFirstSender(
-  buyerAddress: string
-): Promise<string | undefined> {
-  const txs = await provider.getHistory(buyerAddress);
-
-  if (!txs.length) {
-    // If there is no transaction history, return undefined
-    return undefined;
-  }
-
-  // Sorts the buyer transaction history by block number, ascending order
-  txs.sort((a, b) => {
-    if (a.blockNumber === undefined || b.blockNumber === undefined) {
-      return 0;
-    }
-    return a.blockNumber - b.blockNumber;
-  });
-
-  // Find the first transaction that transferred funds to the buyer wallet
-  const fundedBy = txs.find((tx) => tx.to === buyerAddress && tx.value.gt(0));
-
-  if (!fundedBy) {
-    // If no transaction transferred funds to the buyer, return undefined
-    return undefined;
-  }
-
-  // Get the sender's address
-  const sender = fundedBy.from;
-
-  return sender;
-}
-
-async function checkRelationship(transfer: LogDescription): Promise<Finding[]> {
-  const results: Finding[] = [];
-
-  async function countTrades(): Promise<void> {
-    numberOfTrades++;
-  }
-
-  async function countWashTrades(): Promise<void> {
-    numberOfWashTrades++;
-  }
-
-  countTrades();
-  console.log(numberOfTrades);
-
-  const buyer = getBuyer(transfer);
-  const seller = getSeller(transfer);
-  console.log(`buyer is ${buyer}`);
-  console.log(`seller is ${seller}`);
-
-  const tokenId = getNftId(transfer);
-  const sender = await findFirstSender(buyer);
-  console.log(`sender is ${sender}`);
-
-  if (sender && sender === seller) {
-    countWashTrades();
-    const finding = Finding.fromObject({
-      name: "NFT Wash Trade",
-      description: `NFT Wash Trade - seller funded buyer's wallet`,
-      alertId: "NFT-WASH-TRADE",
-      severity: FindingSeverity.Medium,
-      type: FindingType.Suspicious,
-      labels: [
-        {
-          entityType: EntityType.Address,
-          entity: seller,
-          label: "attacker",
-          confidence: 0.9,
-          remove: false,
-        },
-        {
-          entityType: EntityType.Address,
-          entity: buyer,
-          label: "attacker",
-          confidence: 0.9,
-          remove: false,
-        },
-      ],
-      metadata: {
-        BuyerWallet: buyer,
-        SellerWallet: seller,
-        token: `Wash Traded NFT Token ID: ${tokenId}`,
-        anomalyScore: `${numberOfWashTrades / numberOfTrades}`,
-      },
-    });
-    console.log(
-      `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`
-    );
-    results.push(finding);
-  }
-
-  return results;
-}
 
 const handleTransaction: HandleTransaction = async (txEvent) => {
   const findings: Finding[] = [];
+
+  const network = txEvent.network;
 
   const tradeEvents = txEvent.filterLog(exchangeTrades);
   // const exchangeAddressEvents = txEvent.filterLog(exchangeAddressFilters);
@@ -163,10 +52,11 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
     transferEvents.length < 4 &&
     exchangeAddressEvents.length > 0
   ) {
+    console.log(`chain ID is ${network}`);
     for (let i = 0; i < transferEvents.length; i++) {
       const transfer = transferEvents[i];
 
-      const transferFindings = await checkRelationship(transfer);
+      const transferFindings = await checkRelationship(transfer, network);
       findings.push(...transferFindings);
     }
   }

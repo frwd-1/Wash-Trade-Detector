@@ -2,7 +2,7 @@
   "name": "nft-wash-trade-funding-origin",
   "version": "0.0.9",
   "chainIds": [
-    1
+    43114
   ],
   "description": "Forta Bot that detects NFT Wash Trades by identifying self-funded wallets",
   "repository": "https://github.com/Epikt1tus/wash-trade-detection-bot",
