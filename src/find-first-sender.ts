@@ -13,21 +13,20 @@ async function findFirstSender(
   buyerAddress: string,
   network: Network
 ): Promise<string | undefined> {
-  //   const txs = await provider.getHistory(buyerAddress);
-
   // const confirmNetwork = Number(network);
   console.log(`confirm network is ${network}`);
 
   console.log(`network (typeof): ${typeof network}`);
-  console.log(`network (value): ${network}`);
+  const chainId = Number(network);
+  console.log(`chainId (typeof): ${typeof chainId}`);
+  console.log(chainId);
 
   let txs;
-  console.log(`network check 2 is ${network}`);
-  switch (network) {
+  switch (chainId) {
     case 1: // Ethereum Mainnet
       txs = await ethProvider.getHistory(buyerAddress);
       break;
-    case Network.AVALANCHE: // Avalanche
+    case 43114: // Avalanche
       txs = await avaxProvider.getHistory(buyerAddress);
       break;
     case 250: // Fantom

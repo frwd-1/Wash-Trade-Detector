@@ -4,6 +4,7 @@ import {
   FindingType,
   LogDescription,
   EntityType,
+  Network,
 } from "forta-agent";
 import { getBuyer, getSeller, getNftId } from "./utils";
 import { findFirstSender } from "./find-first-sender";
@@ -13,7 +14,7 @@ let numberOfWashTrades: number = 0;
 
 async function checkRelationship(
   transfer: LogDescription,
-  network: number
+  network: Network
 ): Promise<Finding[]> {
   const results: Finding[] = [];
 
@@ -53,6 +54,7 @@ async function checkRelationship(
           label: "attacker",
           confidence: 0.9,
           remove: false,
+          metadata: {},
         },
         {
           entityType: EntityType.Address,
@@ -60,6 +62,7 @@ async function checkRelationship(
           label: "attacker",
           confidence: 0.9,
           remove: false,
+          metadata: {},
         },
       ],
       metadata: {

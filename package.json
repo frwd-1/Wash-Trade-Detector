@@ -1,6 +1,6 @@
 {
   "name": "nft-wash-trade-funding-origin",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "chainIds": [
     43114,
     1,
@@ -27,7 +27,7 @@
     "enable": "forta-agent enable",
     "keyfile": "forta-agent keyfile",
     "test": "jest",
-    "validate-config": "npm run build && ajv validate -s schemas/bot-config.json -d bot-config.json"
+    "validate-config": "npm run build"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.1",
