@@ -8,7 +8,9 @@ import {
 
 const exchangeTrades = Object.values(EXCHANGE_TRADE_EVENTS);
 
+console.log("hello");
 const handleTransaction: HandleTransaction = async (txEvent) => {
+  console.log("hola buenos dias");
   const findings: Finding[] = [];
 
   const network = txEvent.network;
