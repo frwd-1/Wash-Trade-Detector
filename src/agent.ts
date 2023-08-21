@@ -17,16 +17,10 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
 
   const exchanges = Object.values(EXCHANGE_CONTRACT_ADDRESSES);
 
-  // const toAddress = txEvent.to;
-  // console.log(`Interacted with (to) address is ${toAddress}`);
-
   const transferEvents = txEvent.filterLog(TRANSFER_EVENT);
 
   // checks that the transfers are for the trades on a monitored NFT exchange
   if (
-    // tradeEvents.length > 0 &&
-    // transferEvents.length > 0 &&
-    // transferEvents.length < 4
     tradeEvents.length === transferEvents.length &&
     transferEvents.length > 0 &&
     transferEvents.length < 5
