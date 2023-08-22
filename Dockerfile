@@ -5,5 +5,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY ./src ./src
 COPY package*.json ./
+COPY tsconfig.json ./
+COPY ./dist ./dist
 RUN npm ci --production
 CMD [ "npm", "run", "start:prod" ]
