@@ -6,7 +6,7 @@ const db: Database = new sqlite3.Database("./src/database/clusters.db");
 
 db.serialize(() => {
   db.run(
-    "CREATE TABLE IF NOT EXISTS findings (id INTEGER PRIMARY KEY, buyer TEXT, seller TEXT, date TEXT, nftContractAddress TEXT)",
+    "CREATE TABLE IF NOT EXISTS findings (id INTEGER PRIMARY KEY, buyer TEXT, seller TEXT, transactionDate TEXT, nftContractAddress TEXT)",
     (err: Error | null) => {
       if (err) {
         console.error("Error creating table:", err);
@@ -18,17 +18,18 @@ db.serialize(() => {
 export async function addToDatabase(
   buyer: string,
   seller: string,
-  nftContractAddress: string
+  nftContractAddress: string,
+  transactionDateTime: string
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const stmt = db.prepare(
-      "INSERT INTO findings (buyer, seller, date, nftContractAddress) VALUES (?, ?, ?, ?)"
+      "INSERT INTO findings (buyer, seller, transactionDate, nftContractAddress) VALUES (?, ?, ?, ?)"
     );
 
     stmt.run(
       buyer,
       seller,
-      new Date().toISOString(),
+      transactionDateTime,
       nftContractAddress,
       (err: Error | null) => {
         if (err) {

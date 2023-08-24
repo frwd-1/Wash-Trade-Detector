@@ -5,8 +5,16 @@ import {
   LogDescription,
   EntityType,
   Network,
+  TransactionEvent,
 } from "forta-agent";
-import { getBuyer, getSeller, getNftId, getNftContractAddress } from "./utils";
+import {
+  getBuyer,
+  getSeller,
+  getNftId,
+  getNftContractAddress,
+  getTimestamp,
+  getDateTime,
+} from "./utils";
 import { findFirstSender } from "./find-first-sender";
 import { addToDatabase } from "./database/db";
 
@@ -14,6 +22,7 @@ let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
 
 async function checkRelationship(
+  txEvent: TransactionEvent,
   transfer: LogDescription,
   network: Network
 ): Promise<Finding[]> {
@@ -42,6 +51,12 @@ async function checkRelationship(
 
   const nftContractAddress = getNftContractAddress(transfer);
   console.log(`NFT Contract Address: ${nftContractAddress}`);
+
+  const timestamp = getTimestamp(txEvent);
+  console.log(`timestamp is: ${timestamp}`);
+
+  const dateTime = getDateTime(timestamp);
+  console.log(`dateTime is: ${dateTime}`);
 
   if (sender && sender === seller) {
     countWashTrades();
@@ -80,7 +95,7 @@ async function checkRelationship(
     // Insert finding into database
     console.log("adding to database");
 
-    await addToDatabase(buyer, seller, nftContractAddress);
+    await addToDatabase(buyer, seller, nftContractAddress, dateTime);
 
     console.log(
       `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`

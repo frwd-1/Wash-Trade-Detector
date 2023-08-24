@@ -39,7 +39,11 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
         console.log(`chain ID is ${network}`);
         for (let i = 0; i < transferEvents.length; i++) {
           const transfer = transferEvents[i];
-          const transferFindings = await checkRelationship(transfer, network);
+          const transferFindings = await checkRelationship(
+            txEvent,
+            transfer,
+            network
+          );
           findings.push(...transferFindings);
         }
       }
