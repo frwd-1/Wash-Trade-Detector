@@ -80,7 +80,7 @@ async function checkRelationship(
     // Insert finding into database
     console.log("adding to database");
 
-    await addToDatabase(buyer, seller);
+    await addToDatabase(buyer, seller, nftContractAddress);
 
     console.log(
       `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`

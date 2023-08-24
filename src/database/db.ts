@@ -6,7 +6,7 @@ const db: Database = new sqlite3.Database("./src/database/clusters.db");
 
 db.serialize(() => {
   db.run(
-    "CREATE TABLE IF NOT EXISTS findings (id INTEGER PRIMARY KEY, buyer TEXT, seller TEXT, date TEXT)",
+    "CREATE TABLE IF NOT EXISTS findings (id INTEGER PRIMARY KEY, buyer TEXT, seller TEXT, date TEXT, nftContractAddress TEXT)",
     (err: Error | null) => {
       if (err) {
         console.error("Error creating table:", err);
@@ -17,26 +17,33 @@ db.serialize(() => {
 
 export async function addToDatabase(
   buyer: string,
-  seller: string
+  seller: string,
+  nftContractAddress: string
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const stmt = db.prepare(
-      "INSERT INTO findings (buyer, seller, date) VALUES (?, ?, ?)"
+      "INSERT INTO findings (buyer, seller, date, nftContractAddress) VALUES (?, ?, ?, ?)"
     );
 
-    stmt.run(buyer, seller, new Date().toISOString(), (err: Error | null) => {
-      if (err) {
-        console.error("Error inserting into table:", err);
-        reject(err);
-        return;
-      }
-      stmt.finalize((err: Error | null) => {
+    stmt.run(
+      buyer,
+      seller,
+      new Date().toISOString(),
+      nftContractAddress,
+      (err: Error | null) => {
         if (err) {
+          console.error("Error inserting into table:", err);
           reject(err);
           return;
         }
-        resolve();
-      });
-    });
+        stmt.finalize((err: Error | null) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      }
+    );
   });
 }
