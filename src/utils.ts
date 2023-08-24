@@ -50,6 +50,10 @@ export function getNftId(transfer: LogDescription): string {
   return tokenId;
 }
 
+export function getNftContractAddress(transfer: LogDescription): string {
+  return transfer.address;
+}
+
 export function getNftWithOldestSale(): string {
   let oldestSaleTimestamp = Math.floor(new Date().getTime() / 1000);
   let tokenId = nftList[0];

@@ -6,7 +6,7 @@ import {
   EntityType,
   Network,
 } from "forta-agent";
-import { getBuyer, getSeller, getNftId } from "./utils";
+import { getBuyer, getSeller, getNftId, getNftContractAddress } from "./utils";
 import { findFirstSender } from "./find-first-sender";
 import { addToDatabase } from "./database/db";
 
@@ -39,6 +39,9 @@ async function checkRelationship(
   console.log(`network is ${network}`);
   const sender = await findFirstSender(buyer, network);
   console.log(`sender is ${sender}`);
+
+  const nftContractAddress = getNftContractAddress(transfer);
+  console.log(`NFT Contract Address: ${nftContractAddress}`);
 
   if (sender && sender === seller) {
     countWashTrades();
