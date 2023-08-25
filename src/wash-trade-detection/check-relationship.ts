@@ -21,7 +21,7 @@ import {
   addToDatabase,
   addSybilAddress,
   addAddressToCluster,
-} from "./database/db-controller";
+} from "src/database/db-controller";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
@@ -115,8 +115,8 @@ async function checkRelationship(
     await addSybilAddress(buyer, dateTime);
     await addSybilAddress(seller, dateTime);
 
-    await addAddressToCluster(, buyer, dateTime);
-    await addAddressToCluster(dateTime, seller, dateTime);
+    // await addAddressToCluster(, buyer, dateTime);
+    // await addAddressToCluster(dateTime, seller, dateTime);
 
     console.log(
       `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`
