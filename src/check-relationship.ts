@@ -17,7 +17,11 @@ import {
   getExchangeAddress,
 } from "./utils";
 import { findFirstSender } from "./find-first-sender";
-import { addToDatabase } from "./database/db";
+import {
+  addToDatabase,
+  addSybilAddress,
+  addAddressToCluster,
+} from "./database/db-controller";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
@@ -107,6 +111,12 @@ async function checkRelationship(
       tokenId,
       exchangeAddress
     );
+
+    await addSybilAddress(buyer, dateTime);
+    await addSybilAddress(seller, dateTime);
+
+    await addAddressToCluster(, buyer, dateTime);
+    await addAddressToCluster(dateTime, seller, dateTime);
 
     console.log(
       `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`
