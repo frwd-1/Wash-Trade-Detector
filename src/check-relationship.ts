@@ -14,6 +14,7 @@ import {
   getNftContractAddress,
   getTimestamp,
   getDateTime,
+  getExchangeAddress,
 } from "./utils";
 import { findFirstSender } from "./find-first-sender";
 import { addToDatabase } from "./database/db";
@@ -58,6 +59,9 @@ async function checkRelationship(
   const dateTime = getDateTime(timestamp);
   console.log(`dateTime is: ${dateTime}`);
 
+  const exchangeAddress = getExchangeAddress(txEvent);
+  console.log(`exchange address: ${exchangeAddress}`);
+
   if (sender && sender === seller) {
     countWashTrades();
     const finding = Finding.fromObject({
@@ -95,7 +99,14 @@ async function checkRelationship(
     // Insert finding into database
     console.log("adding to database");
 
-    await addToDatabase(buyer, seller, nftContractAddress, dateTime);
+    await addToDatabase(
+      buyer,
+      seller,
+      nftContractAddress,
+      dateTime,
+      tokenId,
+      exchangeAddress
+    );
 
     console.log(
       `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`

@@ -26,3 +26,7 @@ export function getNftId(transfer: LogDescription): string {
 export function getNftContractAddress(transfer: LogDescription): string {
   return transfer.address;
 }
+
+export function getExchangeAddress(txEvent: TransactionEvent): string | null {
+  return txEvent.transaction.to;
+}
