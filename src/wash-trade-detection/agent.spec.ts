@@ -1,5 +1,5 @@
 import { createTransactionEvent } from "forta-agent";
-import agent from "./agent";
+import agent from "src/agent";
 
 describe("handleTransaction", () => {
   it("returns empty findings if no matched events are found", async () => {

@@ -1,10 +1,10 @@
 import { Finding, HandleTransaction } from "forta-agent";
-import { checkRelationship } from "./check-relationship";
+import { checkRelationship } from "./wash-trade-detection/check-relationship";
 import {
   EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
   TRANSFER_EVENT,
-} from "./constants";
+} from "./wash-trade-detection/constants";
 
 const exchangeTrades = Object.values(EXCHANGE_TRADE_EVENTS);
 
@@ -27,10 +27,12 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
     transferEvents.length < 5 &&
     Number(txEvent.transaction.value) > 0
   ) {
+    // if txEvent.to has truthy value
     if (txEvent.to) {
       const isExchangeAddress = exchanges
         .map((addr) => addr.toLowerCase())
         .includes(txEvent.to.toLowerCase());
+      // if isExchangeAddress has truthy value
       if (isExchangeAddress) {
         console.log(`interacted with (to) ${txEvent.to}`);
         console.log(`number of transfer events ${transferEvents.length}`);

@@ -21,7 +21,7 @@ import {
   addToDatabase,
   addSybilAddress,
   addAddressToCluster,
-} from "src/database/db-controller";
+} from "../database/db-controller";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;

@@ -7,7 +7,7 @@ const db: Database = new sqlite3.Database("./src/database/sybil_detection.db");
 db.serialize(() => {
   // Transactions Table
   db.run(
-    "CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY, buyer TEXT, seller TEXT, transactionDate TEXT, nftContractAddress TEXT, nftId TEXT, exchangeAddress TEXT)",
+    "CREATE TABLE IF NOT EXISTS nft_trades (id INTEGER PRIMARY KEY, buyer TEXT, seller TEXT, transactionDate TEXT, nftContractAddress TEXT, nftId TEXT, exchangeAddress TEXT)",
     handleError
   );
 
@@ -34,7 +34,7 @@ export async function addToDatabase(
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const stmt = db.prepare(
-      "INSERT INTO transactions (buyer, seller, transactionDate, nftContractAddress, nftId, exchangeAddress) VALUES (?, ?, ?, ?, ?, ?)"
+      "INSERT INTO nft_trades (buyer, seller, transactionDate, nftContractAddress, nftId, exchangeAddress) VALUES (?, ?, ?, ?, ?, ?)"
     );
 
     stmt.run(
@@ -46,7 +46,7 @@ export async function addToDatabase(
       exchangeAddress,
       (err: Error | null) => {
         if (err) {
-          console.error("Error inserting into transactions table:", err);
+          console.error("Error inserting into nft_trades table:", err);
           reject(err);
           return;
         }
