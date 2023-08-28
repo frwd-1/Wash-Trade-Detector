@@ -21,6 +21,7 @@ import {
   addToDatabase,
   addSybilAddress,
   addAddressToCluster,
+  getClusterIdForAddress,
 } from "../database/db-controller";
 import { createOrAddToCluster } from "../clustering/clustering-bot";
 
@@ -67,7 +68,7 @@ async function checkRelationship(
   const exchangeAddress = getExchangeAddress(txEvent);
   console.log(`exchange address: ${exchangeAddress}`);
 
-  if (sender && sender === seller) {
+  if (sender && (sender === seller || (await getClusterIdForAddress(sender)))) {
     countWashTrades();
     const finding = Finding.fromObject({
       name: "NFT Wash Trade",
