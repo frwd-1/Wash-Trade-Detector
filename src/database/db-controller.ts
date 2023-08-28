@@ -97,6 +97,41 @@ export async function addAddressToCluster(
     });
   });
 }
+export async function getClusterIdForAddress(
+  address: string
+): Promise<number | null> {
+  return new Promise<number | null>((resolve, reject) => {
+    db.get(
+      "SELECT clusterId FROM sybil_clusters WHERE address = ? LIMIT 1",
+      [address],
+      (err: Error | null, row: any) => {
+        if (err) {
+          console.error("Error fetching clusterId for address:", err);
+          reject(err);
+          return;
+        }
+        resolve(row ? row.clusterId : null);
+      }
+    );
+  });
+}
+
+// Get the latest cluster ID to facilitate the generation of new cluster IDs
+export async function getLatestClusterId(): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    db.get(
+      "SELECT MAX(clusterId) as maxClusterId FROM sybil_clusters",
+      (err: Error | null, row: any) => {
+        if (err) {
+          console.error("Error fetching the latest clusterId:", err);
+          reject(err);
+          return;
+        }
+        resolve(row ? row.maxClusterId : 0);
+      }
+    );
+  });
+}
 
 function handleError(err: Error | null): void {
   if (err) {

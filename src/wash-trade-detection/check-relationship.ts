@@ -22,6 +22,7 @@ import {
   addSybilAddress,
   addAddressToCluster,
 } from "../database/db-controller";
+import { createOrAddToCluster } from "../clustering/clustering-bot";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
@@ -115,8 +116,10 @@ async function checkRelationship(
     await addSybilAddress(buyer, dateTime);
     await addSybilAddress(seller, dateTime);
 
-    // await addAddressToCluster(, buyer, dateTime);
-    // await addAddressToCluster(dateTime, seller, dateTime);
+    const clusterId = await createOrAddToCluster([buyer, seller], dateTime);
+    console.log(
+      `Addresses ${buyer} and ${seller} belong to cluster ID: ${clusterId}`
+    );
 
     console.log(
       `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`
