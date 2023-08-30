@@ -4,6 +4,10 @@ const sqlite3 = require("sqlite3").verbose();
 
 const db: Database = new sqlite3.Database("./src/database/sybil_detection.db");
 
+interface ClusterIdRow {
+  maxId: number;
+}
+
 db.serialize(() => {
   // Transactions Table
   db.run(
@@ -23,6 +27,26 @@ db.serialize(() => {
     handleError
   );
 });
+
+export async function getMaxClusterId(): Promise<number | null> {
+  return new Promise<number | null>((resolve, reject) => {
+    const query = "SELECT MAX(clusterId) as maxId FROM sybil_clusters";
+
+    db.get(query, [], (err, row: ClusterIdRow) => {
+      if (err) {
+        console.error("Error fetching max cluster ID:", err);
+        reject(err);
+        return;
+      }
+
+      if (row && row.maxId !== null && row.maxId !== undefined) {
+        resolve(row.maxId);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
 
 export async function addToDatabase(
   buyer: string,

@@ -1,7 +1,17 @@
-import { getClusterIdForAddress } from "../database/db-controller";
+import {
+  getClusterIdForAddress,
+  getMaxClusterId,
+} from "../database/db-controller";
 import { addAddressToCluster } from "../database/db-controller";
 
 let currentClusterId: number = 0;
+
+async function initializeCurrentClusterId(): Promise<void> {
+  const maxClusterId = await getMaxClusterId();
+  currentClusterId = maxClusterId ? maxClusterId : 0;
+}
+
+initializeCurrentClusterId();
 
 export async function createOrAddToCluster(
   addresses: string[],
@@ -15,7 +25,10 @@ export async function createOrAddToCluster(
 
   // 3. Add addresses to the cluster
   for (const address of addresses) {
-    await addAddressToCluster(clusterId, address, dateTime);
+    const addressClusterId = await getClusterIdForAddress(address);
+    if (!addressClusterId) {
+      await addAddressToCluster(clusterId, address, dateTime);
+    }
   }
 
   return clusterId;
