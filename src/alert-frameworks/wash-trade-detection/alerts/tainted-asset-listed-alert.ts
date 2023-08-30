@@ -6,14 +6,14 @@ import {
   FindingType,
   TransactionEvent,
 } from "forta-agent";
-import { isAddressInCluster } from "../../../database/db-utils";
+import { isAssetHighRisk } from "../../../database/db-utils";
 
 export async function checkForNftListing(
   txEvent: TransactionEvent
 ): Promise<Finding | null> {
   // Check if the address is in a cluster
-  const inCluster = await isAddressInCluster(String(txEvent.to));
-  if (inCluster) {
+  const inTable = await isAssetHighRisk(String(txEvent.to));
+  if (inTable) {
     return Finding.fromObject({
       name: "NFT Listing from Clustered Address",
       description: `Address from cluster listed an NFT for sale`,

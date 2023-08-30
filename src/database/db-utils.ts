@@ -193,3 +193,24 @@ export async function isAddressInCluster(address: string): Promise<boolean> {
     });
   });
 }
+
+export async function isAssetHighRisk(address: string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    const query =
+      "SELECT EXISTS(SELECT 1 FROM sybil_assets WHERE assetAddress = ? LIMIT 1) as isExist";
+
+    db.get(query, [address], (err, row: DatabaseRow) => {
+      if (err) {
+        console.error("Error checking if asset exists in table:", err);
+        reject(err);
+        return;
+      }
+
+      if (row && row.isExist === 1) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    });
+  });
+}
