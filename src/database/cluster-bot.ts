@@ -1,5 +1,5 @@
-import { getClusterIdForAddress, getMaxClusterId } from "../database/db-utils";
-import { addAddressToCluster } from "../database/db-utils";
+import { getClusterIdForAddress, getMaxClusterId } from "./db-utils";
+import { addAddressToCluster } from "./db-utils";
 
 let currentClusterId: number = 0;
 

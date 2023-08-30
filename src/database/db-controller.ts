@@ -15,17 +15,17 @@ db.serialize(() => {
 
   // Wallets Table
   db.run(
-    "CREATE TABLE IF NOT EXISTS sybil_addresses (id INTEGER PRIMARY KEY, wallet address TEXT UNIQUE, firstDetectedDate TEXT)",
+    "CREATE TABLE IF NOT EXISTS sybil_wallets (id INTEGER PRIMARY KEY, walletAddress TEXT UNIQUE, firstDetectedDate TEXT)",
     handleError
   );
   // Protocols Table
   db.run(
-    "CREATE TABLE IF NOT EXISTS sybil_addresses (id INTEGER PRIMARY KEY, address TEXT UNIQUE, firstDetectedDate TEXT)",
+    "CREATE TABLE IF NOT EXISTS sybil_protocols (id INTEGER PRIMARY KEY, protocolAddress TEXT UNIQUE, firstDetectedDate TEXT)",
     handleError
   );
   // Assets Table
   db.run(
-    "CREATE TABLE IF NOT EXISTS sybil_addresses (id INTEGER PRIMARY KEY, address TEXT UNIQUE, firstDetectedDate TEXT)",
+    "CREATE TABLE IF NOT EXISTS sybil_assets (id INTEGER PRIMARY KEY, assetAddress TEXT UNIQUE, firstDetectedDate TEXT)",
     handleError
   );
   // Clusters Table

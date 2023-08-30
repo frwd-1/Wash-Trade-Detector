@@ -25,7 +25,7 @@ export async function getMaxClusterId(): Promise<number | null> {
   });
 }
 
-export async function addToDatabase(
+export async function addTxToDatabase(
   buyer: string,
   seller: string,
   nftContractAddress: string,
@@ -58,17 +58,17 @@ export async function addToDatabase(
   });
 }
 
-export async function addSybilAddress(
+export async function addSybilWallet(
   address: string,
   detectedDate: string
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const stmt = db.prepare(
-      "INSERT OR IGNORE INTO sybil_addresses (address, firstDetectedDate) VALUES (?, ?)"
+      "INSERT OR IGNORE INTO sybil_wallets (walletAddress, firstDetectedDate) VALUES (?, ?)"
     );
     stmt.run(address, detectedDate, (err: Error | null) => {
       if (err) {
-        console.error("Error inserting into sybil_addresses table:", err);
+        console.error("Error inserting into sybil_wallets table:", err);
         reject(err);
         return;
       }
@@ -78,6 +78,45 @@ export async function addSybilAddress(
   });
 }
 
+export async function addSybilProtocol(
+  address: string | null,
+  detectedDate: string
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const stmt = db.prepare(
+      "INSERT OR IGNORE INTO sybil_protocols (protocolAddress, firstDetectedDate) VALUES (?, ?)"
+    );
+    stmt.run(address, detectedDate, (err: Error | null) => {
+      if (err) {
+        console.error("Error inserting into sybil_protocols table:", err);
+        reject(err);
+        return;
+      }
+      stmt.finalize(handleError);
+      resolve();
+    });
+  });
+}
+
+export async function addSybilAsset(
+  address: string,
+  detectedDate: string
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const stmt = db.prepare(
+      "INSERT OR IGNORE INTO sybil_assets (assetAddress, firstDetectedDate) VALUES (?, ?)"
+    );
+    stmt.run(address, detectedDate, (err: Error | null) => {
+      if (err) {
+        console.error("Error inserting into sybil_assets table:", err);
+        reject(err);
+        return;
+      }
+      stmt.finalize(handleError);
+      resolve();
+    });
+  });
+}
 export async function addAddressToCluster(
   clusterId: number,
   address: string,

@@ -18,11 +18,13 @@ import {
 } from "./utils";
 import { findFirstSender } from "./find-first-sender";
 import {
-  addToDatabase,
-  addSybilAddress,
+  addTxToDatabase,
+  addSybilWallet,
   getClusterIdForAddress,
+  addSybilAsset,
+  addSybilProtocol,
 } from "../../database/db-utils";
-import { createOrAddToCluster } from "../../clustering/clustering-bot";
+import { createOrAddToCluster } from "../../database/cluster-bot";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
@@ -104,7 +106,7 @@ async function checkRelationship(
     // Insert finding into database
     console.log("adding to database");
 
-    await addToDatabase(
+    await addTxToDatabase(
       buyer,
       seller,
       nftContractAddress,
@@ -113,8 +115,11 @@ async function checkRelationship(
       exchangeAddress
     );
 
-    await addSybilAddress(buyer, dateTime);
-    await addSybilAddress(seller, dateTime);
+    await addSybilWallet(buyer, dateTime);
+    await addSybilWallet(seller, dateTime);
+
+    await addSybilAsset(nftContractAddress, dateTime);
+    await addSybilProtocol(exchangeAddress, dateTime);
 
     const clusterId = await createOrAddToCluster([buyer, seller], dateTime);
     console.log(
