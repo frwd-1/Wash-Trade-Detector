@@ -21,8 +21,8 @@ import {
   addToDatabase,
   addSybilAddress,
   getClusterIdForAddress,
-} from "../database/db-utils";
-import { createOrAddToCluster } from "../clustering/clustering-bot";
+} from "../../database/db-utils";
+import { createOrAddToCluster } from "../../clustering/clustering-bot";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;

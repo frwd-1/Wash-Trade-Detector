@@ -8,8 +8,8 @@ import {
   EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
   TRANSFER_EVENT,
-} from "../wash-trade-detection/constants";
-import { checkRelationship } from "../wash-trade-detection/check-relationship";
+} from "../constants";
+import { checkRelationship } from "../check-relationship";
 
 export async function detectWashTrade(
   txEvent: TransactionEvent
