@@ -1,14 +1,15 @@
 import { db, handleError } from "./db-controller";
 
-interface ClusterIdRow {
-  maxId: number;
+interface DatabaseRow {
+  maxId?: number;
+  isExist?: number;
 }
 
 export async function getMaxClusterId(): Promise<number | null> {
   return new Promise<number | null>((resolve, reject) => {
     const query = "SELECT MAX(clusterId) as maxId FROM sybil_clusters";
 
-    db.get(query, [], (err, row: ClusterIdRow) => {
+    db.get(query, [], (err, row: DatabaseRow) => {
       if (err) {
         console.error("Error fetching max cluster ID:", err);
         reject(err);
@@ -130,5 +131,26 @@ export async function getLatestClusterId(): Promise<number> {
         resolve(row ? row.maxClusterId : 0);
       }
     );
+  });
+}
+
+export async function isAddressInCluster(address: string): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    const query =
+      "SELECT EXISTS(SELECT 1 FROM sybil_clusters WHERE address = ? LIMIT 1) as isExist";
+
+    db.get(query, [address], (err, row: DatabaseRow) => {
+      if (err) {
+        console.error("Error checking if address exists in cluster:", err);
+        reject(err);
+        return;
+      }
+
+      if (row && row.isExist === 1) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    });
   });
 }
