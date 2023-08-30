@@ -20,9 +20,8 @@ import { findFirstSender } from "./find-first-sender";
 import {
   addToDatabase,
   addSybilAddress,
-  addAddressToCluster,
   getClusterIdForAddress,
-} from "../database/db-controller";
+} from "../database/db-utils";
 import { createOrAddToCluster } from "../clustering/clustering-bot";
 
 let numberOfTrades: number = 0;
