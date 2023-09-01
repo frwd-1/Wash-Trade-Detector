@@ -1,9 +1,4 @@
-import {
-  Finding,
-  FindingSeverity,
-  FindingType,
-  TransactionEvent,
-} from "forta-agent";
+import { Finding, TransactionEvent } from "forta-agent";
 import {
   EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
