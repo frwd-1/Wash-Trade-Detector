@@ -30,7 +30,7 @@ db.serialize(() => {
   );
   // Clusters Table
   db.run(
-    "CREATE TABLE IF NOT EXISTS sybil_clusters (id INTEGER PRIMARY KEY, clusterId INTEGER, riskRating TEXT, washTradeAlertCount INTEGER, address TEXT, addedDate TEXT)",
+    "CREATE TABLE IF NOT EXISTS sybil_clusters (id INTEGER PRIMARY KEY, clusterId INTEGER, address TEXT, addedDate TEXT)",
     handleError
   );
 });

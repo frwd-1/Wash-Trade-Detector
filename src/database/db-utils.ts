@@ -1,8 +1,12 @@
 import { db, handleError } from "./db-controller";
-
+type TableName = "sybil_wallets" | "sybil_assets" | "sybil_protocols";
 interface DatabaseRow {
   maxId?: number;
   isExist?: number;
+}
+
+interface WalletRow {
+  washTradeAlertCount: number;
 }
 
 export async function getMaxClusterId(): Promise<number | null> {
@@ -152,6 +156,42 @@ export async function isAssetHighRisk(address: string): Promise<boolean> {
       } else {
         resolve(false);
       }
+    });
+  });
+}
+
+export async function getWashTradeCountForAddress(
+  address: string | null,
+  tableName: TableName
+): Promise<number | null> {
+  return new Promise<number | null>((resolve, reject) => {
+    // Ensure safe table name (prevent SQL injection)
+    if (
+      !["sybil_wallets", "sybil_assets", "sybil_protocols"].includes(tableName)
+    ) {
+      reject(new Error("Invalid table name provided"));
+      return;
+    }
+
+    const columnName =
+      tableName === "sybil_protocols"
+        ? "protocolAddress"
+        : tableName === "sybil_assets"
+        ? "assetAddress"
+        : "walletAddress";
+
+    const query = `SELECT washTradeAlertCount FROM ${tableName} WHERE ${columnName} = ? LIMIT 1`;
+
+    db.get(query, [address], (err: Error | null, row: any) => {
+      if (err) {
+        console.error(
+          `Error fetching washTradeAlertCount for address from ${tableName}:`,
+          err
+        );
+        reject(err);
+        return;
+      }
+      resolve(row ? row.washTradeAlertCount : null);
     });
   });
 }
