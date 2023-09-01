@@ -19,12 +19,14 @@ import {
 import { findFirstSender } from "./find-first-sender";
 import {
   addTxToDatabase,
-  addSybilWallet,
   getClusterIdForAddress,
+} from "../../database/db-utils";
+import { createOrAddToCluster } from "../../database/cluster-logic";
+import {
+  addSybilWallet,
   addSybilAsset,
   addSybilProtocol,
-} from "../../database/db-utils";
-import { createOrAddToCluster } from "../../database/cluster-bot";
+} from "../../database/risk-logic";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
