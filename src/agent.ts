@@ -1,5 +1,5 @@
 import { Finding, HandleTransaction } from "forta-agent";
-import { detectWashTrade } from "./alert-frameworks/wash-trade-detection/alerts/asset-wash-traded-alert";
+import { detectWashTrade } from "./alert-frameworks/wash-trade-detection/handler";
 import { checkForNftListing } from "./alert-frameworks/wash-trade-detection/alerts/tainted-asset-listed-alert";
 
 const handleTransaction: HandleTransaction = async (txEvent) => {

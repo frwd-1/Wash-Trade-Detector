@@ -6,10 +6,10 @@ import {
   mtcProvider,
   bscProvider,
   arbProvider,
-} from "./constants";
+} from "../alert-frameworks/wash-trade-detection/constants";
 import { Network } from "forta-agent";
 
-async function findFirstSender(
+async function alphaFunction(
   buyerAddress: string,
   network: Network
 ): Promise<string | undefined> {
@@ -75,4 +75,4 @@ async function findFirstSender(
   return sender;
 }
 
-export { findFirstSender };
+export { alphaFunction };

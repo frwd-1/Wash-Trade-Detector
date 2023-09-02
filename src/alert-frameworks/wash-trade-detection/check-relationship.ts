@@ -1,9 +1,6 @@
 import {
   Finding,
-  FindingSeverity,
-  FindingType,
   LogDescription,
-  EntityType,
   Network,
   TransactionEvent,
 } from "forta-agent";
@@ -16,7 +13,7 @@ import {
   getDateTime,
   getExchangeAddress,
 } from "./utils";
-import { findFirstSender } from "./find-first-sender";
+import { alphaFunction } from "../../TTPs/alpha-function";
 import {
   addTxToDatabase,
   getClusterIdForAddress,
@@ -27,6 +24,8 @@ import {
   addSybilAsset,
   addSybilProtocol,
 } from "../../database/risk-logic";
+import { detectEdge } from "./alerts/edge-detected-alert";
+import { detectCluster } from "./alerts/cluster-detected-alert";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;
@@ -47,63 +46,45 @@ async function checkRelationship(
   }
 
   countTrades();
-  console.log(numberOfTrades);
 
   const buyer = getBuyer(transfer);
   const seller = getSeller(transfer);
-  console.log(`buyer is ${buyer}`);
-  console.log(`seller is ${seller}`);
 
   const tokenId = getNftId(transfer);
-  console.log(`network is ${network}`);
-  const sender = await findFirstSender(buyer, network);
-  console.log(`sender is ${sender}`);
 
   const nftContractAddress = getNftContractAddress(transfer);
-  console.log(`NFT Contract Address: ${nftContractAddress}`);
 
   const timestamp = getTimestamp(txEvent);
-  console.log(`timestamp is: ${timestamp}`);
 
   const dateTime = getDateTime(timestamp);
-  console.log(`dateTime is: ${dateTime}`);
 
   const exchangeAddress = getExchangeAddress(txEvent);
-  console.log(`exchange address: ${exchangeAddress}`);
 
-  if (sender && (sender === seller || (await getClusterIdForAddress(sender)))) {
+  const bob = await alphaFunction(buyer, network);
+
+  // if (bob && (bob === seller || (await getClusterIdForAddress(bob)))) {
+  if (bob) {
     countWashTrades();
-    const finding = Finding.fromObject({
-      name: "NFT Wash Trade",
-      description: `NFT Wash Trade - seller funded buyer's wallet`,
-      alertId: "NFT-WASH-TRADE",
-      severity: FindingSeverity.Medium,
-      type: FindingType.Suspicious,
-      labels: [
-        {
-          entityType: EntityType.Address,
-          entity: seller,
-          label: "attacker",
-          confidence: 0.9,
-          remove: false,
-          metadata: {},
-        },
-        {
-          entityType: EntityType.Address,
-          entity: buyer,
-          label: "attacker",
-          confidence: 0.9,
-          remove: false,
-          metadata: {},
-        },
-      ],
-      metadata: {
-        BuyerWallet: buyer,
-        SellerWallet: seller,
-        token: `Wash Traded NFT Token ID: ${tokenId}`,
-        anomalyScore: `${numberOfWashTrades / numberOfTrades}`,
-      },
-    });
+
+    let finding: Finding;
+
+    if (bob === seller) {
+      finding = detectCluster(
+        seller,
+        buyer,
+        tokenId,
+        numberOfTrades,
+        numberOfWashTrades
+      );
+    } else if (await getClusterIdForAddress(bob)) {
+      finding = detectEdge(
+        seller,
+        buyer,
+        tokenId,
+        numberOfTrades,
+        numberOfWashTrades
+      );
+    }
 
     // Insert finding into database
     console.log("adding to database");
@@ -131,7 +112,7 @@ async function checkRelationship(
     console.log(
       `the seller wallet ${seller} was used to fund the buyer wallet ${buyer}`
     );
-    results.push(finding);
+    results.push(finding!);
   }
   return results;
 }
