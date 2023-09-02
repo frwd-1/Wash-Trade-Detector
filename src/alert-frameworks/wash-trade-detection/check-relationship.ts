@@ -14,6 +14,7 @@ import {
   getExchangeAddress,
 } from "./utils";
 import { alphaFunction } from "../../TTPs/alpha-function";
+import { betaFunction } from "../../TTPs/beta-function";
 import {
   addTxToDatabase,
   getClusterIdForAddress,
@@ -76,7 +77,7 @@ async function checkRelationship(
         numberOfTrades,
         numberOfWashTrades
       );
-    } else if (await getClusterIdForAddress(bob)) {
+    } else if (await betaFunction(bob)) {
       finding = detectEdge(
         seller,
         buyer,

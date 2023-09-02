@@ -5,10 +5,6 @@ interface DatabaseRow {
   isExist?: number;
 }
 
-interface WalletRow {
-  washTradeAlertCount: number;
-}
-
 export async function getMaxClusterId(): Promise<number | null> {
   return new Promise<number | null>((resolve, reject) => {
     const query = "SELECT MAX(clusterId) as maxId FROM sybil_clusters";
