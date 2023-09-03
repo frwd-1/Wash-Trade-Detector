@@ -4,13 +4,14 @@ import { Address } from "hardhat-deploy/dist/types";
 export function detectCluster(
   seller: Address,
   buyer: Address,
+  _protocol: string | null,
   tokenId: Address,
   numberOfTrades: number,
   numberOfWashTrades: number
 ) {
   return Finding.fromObject({
     name: "NFT Wash Trade",
-    description: `NFT Wash Trade - seller funded buyer's wallet`,
+    description: `NFT Wash Trade detected - wallets controlled by the same cluster`,
     alertId: "NFT-WASH-TRADE",
     severity: FindingSeverity.Medium,
     type: FindingType.Suspicious,
@@ -18,7 +19,7 @@ export function detectCluster(
       {
         entityType: EntityType.Address,
         entity: seller,
-        label: "attacker",
+        label: "cluster",
         confidence: 0.9,
         remove: false,
         metadata: {},
@@ -26,7 +27,7 @@ export function detectCluster(
       {
         entityType: EntityType.Address,
         entity: buyer,
-        label: "attacker",
+        label: "cluster",
         confidence: 0.9,
         remove: false,
         metadata: {},
@@ -35,7 +36,7 @@ export function detectCluster(
     metadata: {
       BuyerWallet: buyer,
       SellerWallet: seller,
-      token: `Wash Traded NFT Token ID: ${tokenId}`,
+      token: tokenId,
       anomalyScore: `${numberOfWashTrades / numberOfTrades}`,
     },
   });

@@ -13,12 +13,9 @@ import {
   getDateTime,
   getExchangeAddress,
 } from "./utils";
-import { alphaFunction } from "../../TTPs/alpha-function";
+import { deltaFunction } from "../../TTPs/delta-function";
 import { betaFunction } from "../../TTPs/beta-function";
-import {
-  addTxToDatabase,
-  getClusterIdForAddress,
-} from "../../database/db-utils";
+import { addTxToDatabase } from "../../database/db-utils";
 import { createOrAddToCluster } from "../../database/cluster-logic";
 import {
   addSybilWallet,
@@ -61,9 +58,8 @@ async function checkRelationship(
 
   const exchangeAddress = getExchangeAddress(txEvent);
 
-  const bob = await alphaFunction(buyer, network);
+  const bob = await deltaFunction(buyer, network);
 
-  // if (bob && (bob === seller || (await getClusterIdForAddress(bob)))) {
   if (bob) {
     countWashTrades();
 
@@ -73,6 +69,7 @@ async function checkRelationship(
       finding = detectCluster(
         seller,
         buyer,
+        exchangeAddress,
         tokenId,
         numberOfTrades,
         numberOfWashTrades
