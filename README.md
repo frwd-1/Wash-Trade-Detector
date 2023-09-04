@@ -1,3 +1,5 @@
+![hydra](./images/defender.png)
+
 # NFT Wash Trade Bot Overview
 
 This bot returns an alert that indicates, with a relatively high degree of confidence, that a wash trade has occurred. According to a recent report by Chainalysis (https://blog.chainalysis.com/reports/2022-crypto-crime-report-preview-nft-wash-trading-money-laundering/), wash trades can often be identified by looking for NFT sales that were "self-financed", meaning the address of the purchaser was initially funded by the address of the seller.
