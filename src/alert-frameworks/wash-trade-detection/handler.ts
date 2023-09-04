@@ -3,8 +3,8 @@ import {
   EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
   TRANSFER_EVENT,
-} from "./constants";
-import { checkRelationship } from "./check-relationship";
+} from "../../constants";
+import { checkRelationship } from "./check-relationship-nft";
 
 export async function detectWashTrade(
   txEvent: TransactionEvent

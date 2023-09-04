@@ -6,7 +6,7 @@ import {
   mtcProvider,
   bscProvider,
   arbProvider,
-} from "../wash-trade-detection/constants";
+} from "./constants";
 
 export function getProviderForNetwork(chainId: number) {
   switch (chainId) {

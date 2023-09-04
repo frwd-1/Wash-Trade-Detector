@@ -15,10 +15,14 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
     findings.push(nftListingFindings);
   }
 
+  const airdropFarmFindings = await checkForNftListing(txEvent);
+  if (airdropFarmFindings) {
+    findings.push(airdropFarmFindings);
+  }
+
   return findings;
 };
 
 export default {
   handleTransaction,
 };
-// check
