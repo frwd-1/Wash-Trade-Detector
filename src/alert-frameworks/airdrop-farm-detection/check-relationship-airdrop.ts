@@ -32,12 +32,14 @@ export async function traceTokenTransfer(
         break;
       }
 
-      const currentProfile = generateProfile(transactions);
+      const currentProfile = await generateProfile(transactions);
 
       if (prevProfile) {
-        const similarity = calculateSimilarity(prevProfile, currentProfile);
+        const similarity = await calculateSimilarity(
+          prevProfile,
+          currentProfile
+        );
         if (similarity < 0.1) {
-          // You can adjust this threshold as needed
           botCluster.add(prevAddr as string);
           botCluster.add(addr);
         }
