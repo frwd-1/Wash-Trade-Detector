@@ -1,6 +1,7 @@
 import { Finding, HandleTransaction } from "forta-agent";
 import { detectWashTrade } from "./alert-frameworks/wash-trade-detection/handler";
 import { checkForNftListing } from "./alert-frameworks/wash-trade-detection/alerts/tainted-asset-listed-alert";
+import { detectAirdropFarm } from "./alert-frameworks/airdrop-farm-detection/airdrop-farm-handler";
 
 const handleTransaction: HandleTransaction = async (txEvent) => {
   const findings: Finding[] = [];
@@ -15,7 +16,7 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
     findings.push(nftListingFindings);
   }
 
-  const airdropFarmFindings = await checkForNftListing(txEvent);
+  const airdropFarmFindings = await detectAirdropFarm(txEvent);
   if (airdropFarmFindings) {
     findings.push(airdropFarmFindings);
   }

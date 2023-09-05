@@ -1,9 +1,10 @@
 import { Finding, TransactionEvent } from "forta-agent";
+
 import {
   EXCHANGE_CONTRACT_ADDRESSES,
   EXCHANGE_TRADE_EVENTS,
   TRANSFER_EVENT,
-} from "../../constants";
+} from "src/agent-config/constants/nft-exchange-contracts";
 import { checkRelationship } from "./check-relationship-nft";
 
 export async function detectWashTrade(

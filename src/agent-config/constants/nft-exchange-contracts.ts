@@ -1,6 +1,3 @@
-import { ethers, Network } from "forta-agent";
-import { CustomProviders } from "./custom-providers";
-
 export const EXCHANGE_CONTRACT_ADDRESSES: Record<string, string> = {
   // Ethereum
   LooksRare: "0x59728544B08AB483533076417FbBB2fD0B17CE3a", // LooksRare: Exchange
@@ -51,53 +48,3 @@ export const EXCHANGE_CONTRACT_ADDRESSES: Record<string, string> = {
   // OpenSea: - same contract as on Ethereum already listed above
   // OKX: "0xcce3e3f79cf9091386f84610bb06947e2fc232a3" (already listed above)
 };
-
-export const EXCHANGE_TRADE_EVENTS: Record<string, string> = {
-  LooksRare:
-    "event TakerBid(bytes32 orderHash, uint256 orderNonce, address indexed taker, address indexed maker, address indexed strategy, address currency, address collection, uint256 tokenId, uint256 amount, uint256 price)",
-  // note - exchange names not listed below are also covered by the Approval event
-  Blur: "event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)",
-  SuperRare:
-    "event AuctionSettled(address indexed _contractAddress, address indexed _bidder, address _seller, uint256 indexed _tokenId, address _currencyAddress, uint256 _amount)",
-  X2Y2: "event EvProfit(bytes32 itemHash, address currency, address to, uint256 amount)",
-  NftMarketplace:
-    "event ItemBought(address indexed buyer, address indexed seller, address indexed nftAddress, uint256 tokenId, uint256 price)",
-};
-
-export const TRANSFER_EVENT =
-  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)";
-
-export const ethProvider = new ethers.providers.EtherscanProvider(
-  "mainnet",
-  process.env.ETHERSCAN_API_KEY
-);
-
-export const avaxProvider = new CustomProviders(
-  Network.AVALANCHE,
-  process.env.SNOWTRACE_API_KEY
-);
-
-export const ftmProvider = new CustomProviders(
-  Network.FANTOM,
-  process.env.FTMSCAN_API_KEY
-);
-
-export const optProvider = new ethers.providers.EtherscanProvider(
-  "optimism",
-  process.env.OTPIMISM_API_KEY
-);
-
-export const mtcProvider = new ethers.providers.EtherscanProvider(
-  "matic",
-  process.env.POLYGONSCAN_API_KEY
-);
-
-export const bscProvider = new CustomProviders(
-  Network.BSC,
-  process.env.BSCSCAN_API_KEY
-);
-
-export const arbProvider = new ethers.providers.EtherscanProvider(
-  "arbitrum",
-  process.env.ARBITRUM_API_KEY
-);

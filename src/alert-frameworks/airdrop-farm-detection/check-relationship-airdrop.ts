@@ -1,10 +1,10 @@
-import { getProviderForNetwork } from "src/network-config";
+import { getProviderForNetwork } from "src/agent-config/network-config";
 import { Network } from "forta-agent";
 import { TransactionProfile } from "src/TTPs/mu-function";
 import { generateProfile } from "src/TTPs/mu-function";
 import { calculateSimilarity } from "src/TTPs/nu-function";
 
-export async function traceTokenTransfer(
+export async function checkAirdropRelationship(
   origin: string,
   network: Network
 ): Promise<string[]> {
