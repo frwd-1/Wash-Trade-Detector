@@ -8,9 +8,9 @@ export const EVENT_PARAMETER_VALIDATORS: Record<
 > = {
   HopProtocol: {
     transactionValue: (txEvent: TransactionEvent) => {
-      const threshold = 500; // in Ether or appropriate units
+      const threshold = 500;
       return Number(txEvent.transaction.value) >= threshold;
     },
-    // Define other validators here...
+    // Define other validators...
   },
 };

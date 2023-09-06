@@ -8,15 +8,13 @@ export async function detectAirdropFarm(
   txEvent: TransactionEvent
 ): Promise<Finding[] | null> {
   const findings: Finding[] = [];
-  //   const qualEvents = Object.values(AIRDROP_QUALIFYING_EVENTS);
-  //   const protocols = Object.values(AIRDROP_CONTRACT_ADDRESSES);
   const network = txEvent.network;
 
   if (txEvent.to) {
     const protocolName = Object.keys(AIRDROP_CONTRACT_ADDRESSES).find(
       (key) =>
         AIRDROP_CONTRACT_ADDRESSES[key].toLowerCase() ===
-        txEvent.to.toLowerCase()
+        txEvent.to!.toLowerCase()
     );
 
     if (protocolName) {
@@ -31,15 +29,11 @@ export async function detectAirdropFarm(
             validator(txEvent)
           )
         ) {
-          for (let i = 0; i < transferEvents.length; i++) {
-            const transfer = transferEvents[i];
-            const transferFindings = await checkAirdropRelationship(
-              txEvent,
-              transfer,
-              network
-            );
-            findings.push(...transferFindings);
-          }
+          const airdropEventFindings = await checkAirdropRelationship(
+            txEvent.from,
+            network
+          );
+          findings.push(...airdropEventFindings);
         }
       }
     }

@@ -3,11 +3,15 @@ import { Network } from "forta-agent";
 import { TransactionProfile } from "src/TTPs/mu-function";
 import { generateProfile } from "src/TTPs/mu-function";
 import { calculateSimilarity } from "src/TTPs/nu-function";
+import { Finding } from "forta-agent";
+import { detectFarmer } from "./alerts/airdrop-farmer-found-alert";
+import { createOrAddToCluster } from "src/database/cluster-logic";
 
 export async function checkAirdropRelationship(
   origin: string,
   network: Network
-): Promise<string[]> {
+): Promise<Finding[]> {
+  const results: Finding[] = [];
   const chainId = Number(network);
   const provider = getProviderForNetwork(chainId);
 
@@ -60,7 +64,11 @@ export async function checkAirdropRelationship(
     }
   }
 
-  // add code to store the botCluster addresses in database.
-
-  return Array.from(allAddr);
+  if (allAddr.size > 10) {
+    let finding: Finding;
+    finding = detectFarmer();
+    results.push(finding);
+    await createOrAddToCluster(Array.from(allAddr), "placeholder");
+  }
+  return results;
 }
