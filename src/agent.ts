@@ -18,7 +18,7 @@ const handleTransaction: HandleTransaction = async (txEvent) => {
 
   const airdropFarmFindings = await detectAirdropFarm(txEvent);
   if (airdropFarmFindings) {
-    findings.push(airdropFarmFindings);
+    findings.push(...airdropFarmFindings);
   }
 
   return findings;

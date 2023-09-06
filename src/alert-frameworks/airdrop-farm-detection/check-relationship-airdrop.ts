@@ -1,11 +1,11 @@
-import { getProviderForNetwork } from "src/agent-config/network-config";
+import { getProviderForNetwork } from "../../agent-config/network-config";
 import { Network } from "forta-agent";
-import { TransactionProfile } from "src/TTPs/mu-function";
-import { generateProfile } from "src/TTPs/mu-function";
-import { calculateSimilarity } from "src/TTPs/nu-function";
+import { TransactionProfile } from "../../TTPs/mu-function";
+import { generateProfile } from "../../TTPs/mu-function";
+import { calculateSimilarity } from "../../TTPs/nu-function";
 import { Finding } from "forta-agent";
 import { detectFarmer } from "./alerts/airdrop-farmer-found-alert";
-import { createOrAddToCluster } from "src/database/cluster-logic";
+import { createOrAddToCluster } from "../../database/cluster-logic";
 
 export async function checkAirdropRelationship(
   origin: string,

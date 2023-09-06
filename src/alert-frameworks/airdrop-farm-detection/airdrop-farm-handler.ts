@@ -1,7 +1,7 @@
 import { Finding, TransactionEvent } from "forta-agent";
-import { AIRDROP_QUALIFYING_EVENTS } from "src/agent-config/constants/airdrop-qual-events";
-import { AIRDROP_CONTRACT_ADDRESSES } from "src/agent-config/constants/airdrop-contracts";
-import { EVENT_PARAMETER_VALIDATORS } from "src/agent-config/constants/airdrop-qual-parameters";
+import { AIRDROP_QUALIFYING_EVENTS } from "../../agent-config/constants/airdrop-qual-events";
+import { AIRDROP_CONTRACT_ADDRESSES } from "../../agent-config/constants/airdrop-contracts";
+import { EVENT_PARAMETER_VALIDATORS } from "../../agent-config/constants/airdrop-qual-parameters";
 import { checkAirdropRelationship } from "./check-relationship-airdrop";
 
 export async function detectAirdropFarm(
