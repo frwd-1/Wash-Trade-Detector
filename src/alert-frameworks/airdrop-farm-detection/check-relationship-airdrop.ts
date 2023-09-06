@@ -11,6 +11,7 @@ export async function checkAirdropRelationship(
   origin: string,
   network: Network
 ): Promise<Finding[]> {
+  console.log(`checking relationship`);
   const results: Finding[] = [];
   const chainId = Number(network);
   const provider = getProviderForNetwork(chainId);
@@ -22,22 +23,26 @@ export async function checkAirdropRelationship(
   let prevProfile: TransactionProfile | null = null;
 
   while (true) {
-    console.log(addr);
+    console.log(`starting address is ${addr}`);
     if (allAddr.has(addr)) {
+      console.log(`all addr array has address`);
       break;
     }
 
     allAddr.add(addr);
+    console.log(`added ${addr} to array`);
 
     try {
       const transactions = await provider.getHistory(addr, 0, 99999999);
-
+      transactions.forEach((tx) => {
+        console.log(`Transaction Hash: ${tx.hash}`);
+      });
       if (!transactions || transactions.length === 0) {
         break;
       }
 
       const currentProfile = await generateProfile(transactions);
-
+      console.log(`transaction profile is... ${currentProfile}`);
       if (prevProfile) {
         const similarity = await calculateSimilarity(
           prevProfile,
