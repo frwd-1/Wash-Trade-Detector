@@ -6,16 +6,19 @@ import { detectAirdropFarm } from "./alert-frameworks/airdrop-farm-detection/air
 const handleTransaction: HandleTransaction = async (txEvent) => {
   const findings: Finding[] = [];
 
+  console.log("checking wash trade...");
   const washTradeFindings = await detectWashTrade(txEvent);
   if (washTradeFindings) {
     findings.push(...washTradeFindings);
   }
 
+  console.log("checking nft listing...");
   const nftListingFindings = await checkForNftListing(txEvent);
   if (nftListingFindings) {
     findings.push(nftListingFindings);
   }
 
+  console.log("checking for airdrop farm...");
   const airdropFarmFindings = await detectAirdropFarm(txEvent);
   if (airdropFarmFindings) {
     findings.push(...airdropFarmFindings);
