@@ -13,6 +13,6 @@ export const EVENT_PARAMETER_VALIDATORS: Record<
       console.log(`transaction value is ${txEvent.transaction.value}`);
       return Number(txEvent.transaction.value) >= threshold;
     },
-    // Define other validators...
+    // other validators to be added...
   },
 };

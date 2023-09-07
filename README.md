@@ -1,12 +1,19 @@
 ![hydra](./images/defender.png)
 
-# Sybil Defender
+# Sybil Defender Overview
 
-This bot returns an alert that indicates, with a relatively high degree of confidence, that a wash trade has occurred. According to a recent report by Chainalysis (https://blog.chainalysis.com/reports/2022-crypto-crime-report-preview-nft-wash-trading-money-laundering/), wash trades can often be identified by looking for NFT sales that were "self-financed", meaning the address of the purchaser was initially funded by the address of the seller.
+The Sybil Defender is a real-time, on-chain monitoring application built on the Forta Network that protects users and protocols from Sybil attacks in DeFi. The Sybil Defender currently covers two subcategories of Sybil attacks commonly found in DeFi - Airdrop Farming and NFT Wash Trading. Protocols can use the Sybil Defender to
+
+## Background
 
 ## Supported Chains
 
 - Ethereum
+- Arbitrum
+- Avalanche
+- Polygon
+- Optimism
+- Fantom
 
 ## Alerts
 
