@@ -53,7 +53,7 @@ export async function checkAirdropRelationship(
           botCluster.add(addr);
         }
       }
-
+      // check relationship
       prevProfile = currentProfile;
       prevAddr = addr;
 
