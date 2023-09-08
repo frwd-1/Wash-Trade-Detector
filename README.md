@@ -16,8 +16,7 @@ Given the public nature of on-chain activity, however, protocols and users can c
 
 The Sybil Defender monitors transactions for all supported chains via the Forta SDK and node operators on the Forta Network.
 
-I) agent.ts - handles transactions initially and runs them through a series of high-level functions that will check Sybil typologies including Airdrop Farming and Wash Trading
-b.
+- agent.ts - handles transactions initially and runs them through a series of high-level functions that will check Sybil typologies including Airdrop Farming
 
 ## Supported Chains
 
