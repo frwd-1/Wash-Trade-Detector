@@ -6,7 +6,7 @@ import {
   FindingType,
   TransactionEvent,
 } from "forta-agent";
-import { isAssetHighRisk } from "../../../database/db-utils";
+import { isAssetHighRisk } from "../database/db-utils";
 
 export async function checkForNftListing(
   txEvent: TransactionEvent

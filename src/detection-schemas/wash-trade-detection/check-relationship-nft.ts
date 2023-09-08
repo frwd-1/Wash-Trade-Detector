@@ -22,8 +22,8 @@ import {
   addSybilAsset,
   addSybilProtocol,
 } from "../../database/risk-logic";
-import { detectEdge } from "./alerts/edge-detected-alert";
-import { detectCluster } from "./alerts/cluster-detected-alert";
+import { detectEdge } from "../../alerts/edge-detected-alert";
+import { detectCluster } from "../../alerts/cluster-detected-alert";
 
 let numberOfTrades: number = 0;
 let numberOfWashTrades: number = 0;

@@ -4,7 +4,7 @@ import { TransactionProfile } from "../../TTPs/mu-function";
 import { generateProfile } from "../../TTPs/mu-function";
 import { calculateSimilarity } from "../../TTPs/nu-function";
 import { Finding } from "forta-agent";
-import { detectFarmer } from "./alerts/airdrop-farmer-found-alert";
+import { detectFarmer } from "../../alerts/airdrop-farmer-found-alert";
 import { createOrAddToCluster } from "../../database/cluster-logic";
 
 export async function checkAirdropRelationship(
