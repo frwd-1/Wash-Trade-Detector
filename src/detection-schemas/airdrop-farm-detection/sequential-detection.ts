@@ -1,26 +1,22 @@
-import { getProviderForNetwork } from "../../agent-config/network-config";
-import { Network } from "forta-agent";
 import { TransactionProfile } from "../../TTPs/mu-function";
 import { generateProfile } from "../../TTPs/mu-function";
-import { calculateSimilarity } from "../../TTPs/nu-function";
-import { Finding } from "forta-agent";
-import { detectFarmer } from "../../alerts/airdrop-farmer-found-alert";
-import { createOrAddToCluster } from "../../database/cluster-logic";
+import { getProviderForNetwork } from "../../agent-config/network-config";
 
-export async function checkAirdropRelationship(
-  origin: string,
-  network: Network
-): Promise<Finding[]> {
-  console.log(`checking relationship`);
-  const results: Finding[] = [];
-  const chainId = Number(network);
-  const provider = getProviderForNetwork(chainId);
-
+export async function sequenceDetect(
+  addr: string,
+  network: any
+): Promise<{
+  allAddr: Set<string>;
+  botCluster: Set<string>;
+  prevProfile: TransactionProfile | null;
+}> {
   const allAddr: Set<string> = new Set();
   const botCluster: Set<string> = new Set();
-  let addr: string = origin;
   let prevAddr: string | null = null;
   let prevProfile: TransactionProfile | null = null;
+
+  const chainId = Number(network);
+  const provider = getProviderForNetwork(chainId);
 
   while (true) {
     console.log(`starting address is ${addr}`);
@@ -41,16 +37,19 @@ export async function checkAirdropRelationship(
         break;
       }
 
-      const currentProfile = await generateProfile(transactions);
+      const currentProfile = await generateProfile(addr, transactions);
       console.log(`transaction profile is... ${currentProfile}`);
-      if (prevProfile) {
-        const similarity = await calculateSimilarity(
-          prevProfile,
-          currentProfile
+      if (currentProfile.isFirstFunder && prevProfile) {
+        const sweepProfile = await generateProfile(
+          addr,
+          await provider.getHistory(currentProfile.sweep!, 0, 99999999)
         );
-        if (similarity < 0.1) {
-          botCluster.add(prevAddr as string);
-          botCluster.add(addr);
+
+        if (
+          JSON.stringify(currentProfile.interactions) ===
+          JSON.stringify(sweepProfile.interactions)
+        ) {
+          //   addToDatabase(currentProfile, sweepProfile); // Placeholder function
         }
       }
       // check relationship
@@ -69,11 +68,5 @@ export async function checkAirdropRelationship(
     }
   }
 
-  if (allAddr.size > 10) {
-    let finding: Finding;
-    finding = detectFarmer();
-    results.push(finding);
-    await createOrAddToCluster(Array.from(allAddr), "placeholder");
-  }
-  return results;
+  return { allAddr, botCluster, prevProfile };
 }
