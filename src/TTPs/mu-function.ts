@@ -13,6 +13,7 @@ export type TransactionProfile = {
   uniqueDestinations: number;
 };
 
+// TODO: just check funder and sweep addresses only
 export function generateProfile(
   transactions: any[]
 ): Promise<TransactionProfile> {
