@@ -1,48 +1,65 @@
-import { BigNumber } from "bignumber.js";
-
 export type TransactionProfile = {
   funder?: string;
   sweep?: string;
-  isFirstFunder: boolean;
   interactions: string[];
 };
 
+async function isEOA(address: string, provider: any): Promise<boolean> {
+  const code = await provider.getCode(address);
+  return code === "0x";
+}
+
 export async function generateProfile(
   addr: string,
-  transactions: any[]
+  transactions: any[],
+  provider: any
 ): Promise<TransactionProfile> {
-  // ... existing code ...
-
   let funder: string | undefined;
   let sweep: string | undefined;
   let isFirstFunder = false;
   const interactions: Set<string> = new Set();
 
+  let foundFunder = false;
+  let foundSweep = false;
+
   for (const tx of transactions) {
-    // ... existing code ...
+    // If we've found both funder and sweep, stop processing
+    if (foundFunder && foundSweep) break;
 
-    if (!funder && tx.to.toLowerCase() === addr) {
-      funder = tx.from.toLowerCase();
+    // 1. Find the Funder
+    if (!foundFunder && tx.to.toLowerCase() === addr) {
+      const isAddressEOA = await isEOA(tx.from, provider);
+      if (isAddressEOA) {
+        console.log(`funder found! funder is ${tx.from}`);
+        funder = tx.from.toLowerCase();
+        foundFunder = true;
+      }
     }
 
-    if (!sweep && tx.from.toLowerCase() === addr) {
-      sweep = tx.to.toLowerCase();
-    }
-
-    if (sweep && tx.to.toLowerCase() === sweep && !tx.value) {
-      isFirstFunder = true;
-    }
-
-    if (tx.to.toLowerCase() !== funder && tx.to.toLowerCase() !== sweep) {
-      interactions.add(tx.to.toLowerCase());
+    // 2. Find Interactions
+    if (foundFunder && !foundSweep) {
+      if (tx.from.toLowerCase() === addr && tx.to.toLowerCase() !== funder) {
+        const isRecipientEOA = await isEOA(tx.to, provider);
+        if (isRecipientEOA) {
+          console.log(`sweep is ${tx.to}`);
+          sweep = tx.to.toLowerCase();
+          foundSweep = true;
+        } else {
+          console.log(`interaction found: ${tx.to}`);
+          interactions.add(tx.to.toLowerCase());
+        }
+      }
     }
   }
 
+  console.log(
+    `profile for address: ${addr} is complete - funder: ${funder}, sweep: ${sweep}, , interactions: ${Array.from(
+      interactions
+    )}`
+  );
   return Promise.resolve({
     funder,
     sweep,
-    isFirstFunder,
     interactions: Array.from(interactions),
-    // ... rest of the properties ...
   });
 }

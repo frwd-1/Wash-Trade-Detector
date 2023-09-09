@@ -1,4 +1,3 @@
-import { getProviderForNetwork } from "../../agent-config/network-config";
 import { Network } from "forta-agent";
 import { sequenceDetect } from "./sequential-detection";
 import { Finding } from "forta-agent";
@@ -12,7 +11,7 @@ export async function checkAirdropRelationship(
   console.log(`checking relationship`);
   const results: Finding[] = [];
 
-  const { allAddr, botCluster } = await sequenceDetect(origin, network);
+  const { allAddr } = await sequenceDetect(origin, network);
 
   if (allAddr.size > 10) {
     let finding: Finding;

@@ -1,22 +1,21 @@
 import { TransactionProfile } from "../../TTPs/mu-function";
 import { generateProfile } from "../../TTPs/mu-function";
 import { getProviderForNetwork } from "../../agent-config/network-config";
+import { calculateSimilarity } from "../../TTPs/nu-function";
+import { createOrAddToCluster } from "src/database/cluster-logic";
 
 export async function sequenceDetect(
   addr: string,
   network: any
 ): Promise<{
   allAddr: Set<string>;
-  botCluster: Set<string>;
-  prevProfile: TransactionProfile | null;
 }> {
   const allAddr: Set<string> = new Set();
-  const botCluster: Set<string> = new Set();
-  let prevAddr: string | null = null;
-  let prevProfile: TransactionProfile | null = null;
 
   const chainId = Number(network);
   const provider = getProviderForNetwork(chainId);
+
+  let isFirstIteration = true;
 
   while (true) {
     console.log(`starting address is ${addr}`);
@@ -24,9 +23,6 @@ export async function sequenceDetect(
       console.log(`all addr array has address`);
       break;
     }
-
-    allAddr.add(addr);
-    console.log(`added ${addr} to array`);
 
     try {
       const transactions = await provider.getHistory(addr, 0, 99999999);
@@ -37,36 +33,42 @@ export async function sequenceDetect(
         break;
       }
 
-      const currentProfile = await generateProfile(addr, transactions);
+      const currentProfile = await generateProfile(
+        addr,
+        transactions,
+        provider
+      );
       console.log(`transaction profile is... ${currentProfile}`);
-      if (currentProfile.isFirstFunder && prevProfile) {
+      if (currentProfile.sweep) {
+        console.log(`getting profile for ${currentProfile.sweep}`);
         const sweepProfile = await generateProfile(
-          addr,
-          await provider.getHistory(currentProfile.sweep!, 0, 99999999)
+          currentProfile.sweep,
+          await provider.getHistory(currentProfile.sweep!, 0, 99999999),
+          provider
+        );
+        console.log(`notice! addr is ${addr}`);
+        console.log(
+          `notice! current profile funder is ${currentProfile.funder}`
         );
 
-        if (
-          JSON.stringify(currentProfile.interactions) ===
-          JSON.stringify(sweepProfile.interactions)
-        ) {
-          //   addToDatabase(currentProfile, sweepProfile); // Placeholder function
+        const isSimilar = await calculateSimilarity(
+          currentProfile,
+          sweepProfile
+        );
+        if (isSimilar) {
+          allAddr.add(addr);
+          console.log(`added ${addr} to array`);
+          addr = currentProfile.sweep;
+          console.log(`new addr is ${addr}`);
+        } else {
+          break;
         }
-      }
-      // check relationship
-      prevProfile = currentProfile;
-      prevAddr = addr;
-
-      if (transactions[0].to) {
-        addr = transactions[0].to;
-      } else {
-        console.warn("Unexpected transaction format: Missing 'to' address");
-        break;
       }
     } catch (err) {
       console.error("Failed to fetch data from API:", err);
       break;
     }
   }
-
-  return { allAddr, botCluster, prevProfile };
+  //   createOrAddToCluster(String(allAddr), "placeholder")
+  return { allAddr };
 }
