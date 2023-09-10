@@ -15,8 +15,6 @@ export async function sequenceDetect(
   const chainId = Number(network);
   const provider = getProviderForNetwork(chainId);
 
-  let isFirstIteration = true;
-
   while (true) {
     console.log(`starting address is ${addr}`);
     if (allAddr.has(addr)) {
