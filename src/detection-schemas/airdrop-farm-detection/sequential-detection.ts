@@ -4,6 +4,10 @@ import { getProviderForNetwork } from "../../agent-config/network-config";
 import { calculateSimilarity } from "../../TTPs/nu-function";
 import { createOrAddToCluster } from "src/database/cluster-logic";
 
+// create a profile/identity between the most recent funder and sweep
+// count of transactions
+// amount sent in transactions
+// contracts interacted with
 export async function sequenceDetect(
   addr: string,
   network: any
