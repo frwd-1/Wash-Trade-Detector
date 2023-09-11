@@ -16,7 +16,6 @@ export async function generateProfile(
 ): Promise<TransactionProfile> {
   let funder: string | undefined;
   let sweep: string | undefined;
-  let isFirstFunder = false;
   const interactions: Set<string> = new Set();
 
   let foundFunder = false;
