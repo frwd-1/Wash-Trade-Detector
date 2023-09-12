@@ -11,6 +11,8 @@ export async function sequenceDetect(
   const allAddr: Set<string> = new Set();
   const chainId = Number(network);
   const provider = getProviderForNetwork(chainId);
+  let firstIteration: boolean = true;
+  let sweepTimestamp: number = 0;
 
   while (true) {
     console.log(`Starting address is ${addr}`);
@@ -29,11 +31,22 @@ export async function sequenceDetect(
       }
 
       console.log(`Checking rapid movements`);
-      const rapidAddress = await trackRapidMovements(addr, provider);
+      const rapidTransaction = await trackRapidMovements(
+        addr,
+        provider,
+        firstIteration,
+        sweepTimestamp
+      );
 
-      if (rapidAddress) {
-        allAddr.add(rapidAddress);
-        addr = rapidAddress; // Use the new found address for the next iteration.
+      if (rapidTransaction) {
+        allAddr.add(rapidTransaction.to);
+        sweepTimestamp = rapidTransaction.timestamp;
+        if (firstIteration) {
+          console.log("first iteration, adding starting address to array");
+          allAddr.add(addr);
+          firstIteration = false;
+        }
+        addr = rapidTransaction.to; // Use the new found address for the next iteration.
         continue;
       }
 

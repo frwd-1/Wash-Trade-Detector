@@ -16,34 +16,31 @@ async function isEOA(address: string, provider: any): Promise<boolean> {
 
 export async function trackRapidMovements(
   addr: string,
-  provider: any
-): Promise<string | null> {
+  provider: any,
+  firstIteration: boolean,
+  sweepTimestamp: number
+): Promise<Transaction | null> {
   console.log(`Initiating rapid movement tracking for address: ${addr}`);
 
   let currentAddress = addr;
-  let previousTimestamp: number | null = await getFirstFundingTimestamp(
-    currentAddress,
-    provider
-  );
+  let funderTimestamp: number | null;
 
-  if (!previousTimestamp) {
-    console.log(`No funding transaction found for ${currentAddress}. Exiting.`);
-    return null;
+  if (firstIteration) {
+    funderTimestamp = await getFirstFundingTimestamp(currentAddress, provider);
+    console.log(`funder timestamp is ${funderTimestamp}`);
+  } else {
+    funderTimestamp = sweepTimestamp;
+    console.log(`funder timestamp is ${funderTimestamp}`);
   }
 
-  const outgoingTransaction: Transaction | null =
-    await findOutgoingTransactionWithin24HoursFromPrevious(
+  const sweepTransaction: Transaction | null =
+    await findsweepTransactionWithin24HoursFromfunder(
       currentAddress,
       provider,
-      previousTimestamp
+      funderTimestamp
     );
 
-  if (!outgoingTransaction) {
-    console.log(`No rapid movement found for ${currentAddress}.`);
-    return null;
-  }
-
-  return outgoingTransaction.to;
+  return sweepTransaction;
 }
 
 async function getFirstFundingTimestamp(
@@ -53,32 +50,36 @@ async function getFirstFundingTimestamp(
   const transactions = await provider.getHistory(addr);
   for (const tx of transactions) {
     if (tx.to.toLowerCase() === addr) {
-      // Funding transaction
+      console.log(`first funding timestamp is ${tx.timestamp}`);
       return tx.timestamp;
     }
   }
   return null;
 }
 
-async function findOutgoingTransactionWithin24HoursFromPrevious(
+async function findsweepTransactionWithin24HoursFromfunder(
   addr: string,
   provider: any,
-  previousTimestamp: number
+  funderTimestamp: number | null
 ): Promise<Transaction | null> {
   console.log(
-    `Fetching transactions for ${addr} to find rapid movements from previous transaction time.`
+    `Fetching transactions for ${addr} to find rapid movements from funder transaction time.`
   );
 
   const transactions = await provider.getHistory(addr);
   for (const tx of transactions) {
     console.log(`Checking transaction from ${tx.from} to ${tx.to}.`);
-
+    const timeDifference = tx.timestamp - funderTimestamp!;
+    console.log(
+      `time difference is (${timeDifference}) requried to be less than 86400`
+    );
+    console.log(`addr is ${addr} and tx from is ${tx.from}`);
     if (
-      tx.from.toLowerCase() === addr &&
-      tx.timestamp - previousTimestamp <= 24 * 60 * 60
+      tx.from.toLowerCase() === addr.toLowerCase() &&
+      timeDifference <= 24 * 60 * 60
     ) {
       console.log(
-        `Transaction from ${tx.from} to ${tx.to} is a rapid movement from the previous transaction.`
+        `Transaction from ${tx.from} to ${tx.to} is a rapid movement from the funder transaction.`
       );
       if (await isEOA(tx.to, provider)) {
         console.log(`Recipient ${tx.to} is an EOA. Returning transaction.`);
@@ -90,7 +91,7 @@ async function findOutgoingTransactionWithin24HoursFromPrevious(
   }
 
   console.log(
-    `No outgoing transactions within 24 hours of the previous transaction found for ${addr}.`
+    `No sweep transactions within 24 hours of the funder transaction found for ${addr}.`
   );
   return null;
 }
