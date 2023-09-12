@@ -1,9 +1,8 @@
-import { TransactionProfile } from "../../TTPs/mu-function";
 import { generateProfile } from "../../TTPs/mu-function";
 import { getProviderForNetwork } from "../../agent-config/network-config";
 import { calculateSimilarity } from "../../TTPs/nu-function";
-import { createOrAddToCluster } from "src/database/cluster-logic";
-import { trackRapidMovements } from "src/TTPs/sigma-function";
+import { createOrAddToCluster } from "../../database/cluster-logic";
+import { trackRapidMovements } from "../../TTPs/sigma-function";
 
 export async function sequenceDetect(
   addr: string,
@@ -14,10 +13,10 @@ export async function sequenceDetect(
   const provider = getProviderForNetwork(chainId);
 
   while (true) {
-    console.log(`starting address is ${addr}`);
+    console.log(`Starting address is ${addr}`);
     if (allAddr.has(addr)) {
-      console.log(`all addr array has address`);
-      break;
+      console.log(`All addresses array already contains ${addr}`);
+      //   break;
     }
 
     try {
@@ -29,6 +28,16 @@ export async function sequenceDetect(
         break;
       }
 
+      console.log(`Checking rapid movements`);
+      const rapidAddress = await trackRapidMovements(addr, provider);
+
+      if (rapidAddress) {
+        allAddr.add(rapidAddress);
+        addr = rapidAddress; // Use the new found address for the next iteration.
+        continue;
+      }
+
+      console.log("getting profiles");
       const currentProfile = await generateProfile(
         addr,
         transactions,
@@ -53,14 +62,6 @@ export async function sequenceDetect(
           addr = currentProfile.sweep;
         }
       }
-
-      console.log(`checking sigmas`);
-      const rapidAddresses = await trackRapidMovements(addr, provider);
-
-      if (rapidAddresses.length > 0) {
-        rapidAddresses.forEach((address) => allAddr.add(address));
-        addr = rapidAddresses[rapidAddresses.length - 1]; // Use the last address in the rapid movement path for the next iteration.
-      }
     } catch (err) {
       console.error("Failed to fetch data from API:", err);
       break;
@@ -70,7 +71,12 @@ export async function sequenceDetect(
   const allAddrArray = Array.from(allAddr);
   const currentDateTime = new Date().toISOString();
 
-  const clusterId = await createOrAddToCluster(allAddrArray, currentDateTime);
-  console.log(`Addresses added to cluster with ID: ${clusterId}`);
+  if (allAddr.size > 10) {
+    const clusterId = await createOrAddToCluster(allAddrArray, currentDateTime);
+    console.log(`Addresses added to cluster with ID: ${clusterId}`);
+  } else {
+    console.log("The set has 10 or fewer addresses. Not adding to cluster.");
+  }
+
   return { allAddr };
 }
