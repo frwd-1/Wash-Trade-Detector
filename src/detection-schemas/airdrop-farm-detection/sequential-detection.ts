@@ -3,6 +3,7 @@ import { getProviderForNetwork } from "../../agent-config/network-config";
 import { calculateSimilarity } from "../../TTPs/nu-function";
 import { createOrAddToCluster } from "../../database/cluster-logic";
 import { trackRapidMovements } from "../../TTPs/sigma-function";
+import { getTransactionHistory } from "./get-txns";
 
 export async function sequenceDetect(
   addr: string,
@@ -13,30 +14,60 @@ export async function sequenceDetect(
   const provider = getProviderForNetwork(chainId);
   let firstIteration: boolean = true;
   let sweepTimestamp: number = 0;
+  let firstThreeAddresses: string[] = [];
 
   while (true) {
+    if (allAddr.size > 500) {
+      console.log("Reached maximum addresses limit. Exiting loop.");
+      break;
+    }
+
     console.log(`Starting address is ${addr}`);
+    console.log(`allAddr array contains ${[...allAddr]}`);
+    console.log(`allAddr array length is ${allAddr.size}`);
     if (allAddr.has(addr)) {
       console.log(`All addresses array already contains ${addr}`);
-      //   break;
     }
 
     try {
-      const transactions = await provider.getHistory(addr, 0, 99999999);
+      const transactions = await getTransactionHistory(addr, provider);
       transactions.forEach((tx) => {
         console.log(`Transaction Hash: ${tx.hash}`);
       });
-      if (!transactions || transactions.length === 0) {
+      if (
+        !transactions ||
+        transactions.length === 0 ||
+        transactions.length > 150
+      ) {
         break;
       }
 
-      console.log(`Checking rapid movements`);
       const rapidTransaction = await trackRapidMovements(
         addr,
         provider,
         firstIteration,
         sweepTimestamp
       );
+      const currentProfile = await generateProfile(
+        addr,
+        transactions,
+        provider
+      );
+      const sweepProfile = currentProfile.sweep
+        ? await generateProfile(
+            currentProfile.sweep,
+            await getTransactionHistory(currentProfile.sweep!, provider),
+            provider
+          )
+        : null;
+
+      const isSimilar = sweepProfile
+        ? await calculateSimilarity(currentProfile, sweepProfile)
+        : false;
+
+      if (!rapidTransaction && !isSimilar) {
+        break; // Break out of the loop if both conditions are false
+      }
 
       if (rapidTransaction) {
         allAddr.add(rapidTransaction.to);
@@ -47,33 +78,20 @@ export async function sequenceDetect(
           firstIteration = false;
         }
         addr = rapidTransaction.to; // Use the new found address for the next iteration.
-        continue;
+      } else if (isSimilar) {
+        allAddr.add(addr);
+        addr = currentProfile.sweep!;
       }
 
-      console.log("getting profiles");
-      const currentProfile = await generateProfile(
-        addr,
-        transactions,
-        provider
-      );
-      console.log(`transaction profile is... ${currentProfile}`);
-
-      if (currentProfile.sweep) {
-        const sweepProfile = await generateProfile(
-          currentProfile.sweep,
-          await provider.getHistory(currentProfile.sweep!, 0, 99999999),
-          provider
-        );
-
-        const isSimilar = await calculateSimilarity(
-          currentProfile,
-          sweepProfile
-        );
-
-        if (isSimilar) {
-          allAddr.add(addr);
-          addr = currentProfile.sweep;
-        }
+      // Check if the function returns addresses in the same order as the first 3 addresses
+      if (allAddr.size <= 3) {
+        firstThreeAddresses = [...allAddr];
+      } else if (
+        firstThreeAddresses.includes(addr) &&
+        firstThreeAddresses.indexOf(addr) < 3
+      ) {
+        console.log("Detected same order for first 3 addresses. Exiting loop.");
+        break;
       }
     } catch (err) {
       console.error("Failed to fetch data from API:", err);

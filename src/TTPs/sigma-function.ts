@@ -1,4 +1,5 @@
 // rapid movement of funds
+import { getTransactionHistory } from "../detection-schemas/airdrop-farm-detection/get-txns";
 
 export type EOAPath = string[];
 
@@ -47,7 +48,7 @@ async function getFirstFundingTimestamp(
   addr: string,
   provider: any
 ): Promise<number | null> {
-  const transactions = await provider.getHistory(addr);
+  const transactions = await getTransactionHistory(addr, provider);
   for (const tx of transactions) {
     if (tx.to.toLowerCase() === addr) {
       console.log(`first funding timestamp is ${tx.timestamp}`);
@@ -66,7 +67,7 @@ async function findsweepTransactionWithin24HoursFromfunder(
     `Fetching transactions for ${addr} to find rapid movements from funder transaction time.`
   );
 
-  const transactions = await provider.getHistory(addr);
+  const transactions = await getTransactionHistory(addr, provider);
   for (const tx of transactions) {
     console.log(`Checking transaction from ${tx.from} to ${tx.to}.`);
     const timeDifference = tx.timestamp - funderTimestamp!;
@@ -76,7 +77,8 @@ async function findsweepTransactionWithin24HoursFromfunder(
     console.log(`addr is ${addr} and tx from is ${tx.from}`);
     if (
       tx.from.toLowerCase() === addr.toLowerCase() &&
-      timeDifference <= 24 * 60 * 60
+      timeDifference <= 24 * 60 * 60 &&
+      timeDifference > 0
     ) {
       console.log(
         `Transaction from ${tx.from} to ${tx.to} is a rapid movement from the funder transaction.`
