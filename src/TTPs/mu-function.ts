@@ -1,3 +1,7 @@
+const profileCache: Map<string, TransactionProfile> = new Map();
+const profileOrder: string[] = []; // This array tracks the order of profile additions
+const MAX_CACHE_SIZE = 10;
+
 export type TransactionProfile = {
   funder?: string;
   sweep?: string;
@@ -14,6 +18,12 @@ export async function generateProfile(
   transactions: any[],
   provider: any
 ): Promise<TransactionProfile> {
+  // Check if the profile for the address exists in the cache
+  if (profileCache.has(addr)) {
+    console.log(`Returning cached profile for address ${addr}`);
+    return profileCache.get(addr)!;
+  }
+
   let funder: string | undefined;
   let sweep: string | undefined;
   const interactions: Set<string> = new Set();
@@ -51,14 +61,30 @@ export async function generateProfile(
     }
   }
 
-  console.log(
-    `profile for address: ${addr} is complete - funder: ${funder}, sweep: ${sweep}, , interactions: ${Array.from(
-      interactions
-    )}`
-  );
-  return Promise.resolve({
+  const generatedProfile = {
     funder,
     sweep,
     interactions: Array.from(interactions),
-  });
+  };
+
+  // Save the generated profile to cache
+  profileCache.set(addr, generatedProfile);
+  profileOrder.push(addr); // Track the order of profile additions
+
+  // Check cache size
+  if (profileOrder.length > MAX_CACHE_SIZE) {
+    // Delete the oldest profile from the cache
+    const oldestAddr = profileOrder.shift();
+    if (oldestAddr) {
+      profileCache.delete(oldestAddr);
+    }
+  }
+
+  console.log(
+    `profile for address: ${addr} is complete - funder: ${funder}, sweep: ${sweep}, interactions: ${Array.from(
+      interactions
+    )}`
+  );
+
+  return generatedProfile;
 }

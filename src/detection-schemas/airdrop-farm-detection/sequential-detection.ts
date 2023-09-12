@@ -34,6 +34,7 @@ export async function sequenceDetect(
       transactions.forEach((tx) => {
         console.log(`Transaction Hash: ${tx.hash}`);
       });
+
       if (
         !transactions ||
         transactions.length === 0 ||
@@ -48,6 +49,8 @@ export async function sequenceDetect(
         firstIteration,
         sweepTimestamp
       );
+
+      console.log(`generating current profile for ${addr}`);
       const currentProfile = await generateProfile(
         addr,
         transactions,
@@ -61,15 +64,21 @@ export async function sequenceDetect(
           )
         : null;
 
+      if (sweepProfile) {
+        console.log("A sweep profile was found.");
+      } else {
+        console.log("No sweep profile found.");
+      }
+
       const isSimilar = sweepProfile
         ? await calculateSimilarity(currentProfile, sweepProfile)
         : false;
 
-      if (!rapidTransaction && !isSimilar) {
-        break; // Break out of the loop if both conditions are false
-      }
+      if (rapidTransaction && isSimilar) {
+        console.log(
+          "Both rapid movement and similarity detected. Only considering rapid movement."
+        );
 
-      if (rapidTransaction) {
         allAddr.add(rapidTransaction.to);
         sweepTimestamp = rapidTransaction.timestamp;
         if (firstIteration) {
@@ -77,10 +86,29 @@ export async function sequenceDetect(
           allAddr.add(addr);
           firstIteration = false;
         }
-        addr = rapidTransaction.to; // Use the new found address for the next iteration.
+        addr = rapidTransaction.to;
+        continue;
+      }
+
+      if (rapidTransaction) {
+        console.log("Rapid movement detected");
+
+        allAddr.add(rapidTransaction.to);
+        sweepTimestamp = rapidTransaction.timestamp;
+        if (firstIteration) {
+          console.log("first iteration, adding starting address to array");
+          allAddr.add(addr);
+          firstIteration = false;
+        }
+        addr = rapidTransaction.to;
       } else if (isSimilar) {
+        console.log("Similarity detected");
+
         allAddr.add(addr);
         addr = currentProfile.sweep!;
+      } else {
+        console.log("No rapid movement or similarities detected");
+        break;
       }
 
       // Check if the function returns addresses in the same order as the first 3 addresses
