@@ -8,7 +8,7 @@ export const EVENT_PARAMETER_VALIDATORS: Record<
 > = {
   HopProtocol: {
     transactionValue: (txEvent: TransactionEvent) => {
-      const threshold = 500000000000000000;
+      const threshold = 10000000000000000;
       console.log(`threshold is ${threshold}`);
       console.log(`transaction value is ${txEvent.transaction.value}`);
       return Number(txEvent.transaction.value) >= threshold;
