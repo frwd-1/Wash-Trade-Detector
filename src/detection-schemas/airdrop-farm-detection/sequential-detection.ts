@@ -37,8 +37,8 @@ export async function sequenceDetect(
 
       if (
         !transactions ||
-        transactions.length === 0 ||
-        transactions.length > 150
+        transactions.length === 0
+        // transactions.length > 150
       ) {
         break;
       }
@@ -49,6 +49,11 @@ export async function sequenceDetect(
         firstIteration,
         sweepTimestamp
       );
+
+      if (!rapidTransaction) {
+        console.log("No rapid movement detected. Skipping further checks.");
+        break;
+      }
 
       console.log(`generating current profile for ${addr}`);
       const currentProfile = await generateProfile(
